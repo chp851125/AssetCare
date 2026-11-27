@@ -1,0 +1,8 @@
+@model ComingSoonViewModel
+@{ ViewData["Title"] = Model.Title; }
+<div class="empty-state">
+    <i class="bi @Model.Icon"></i>
+    <h1 class="h4">@Model.Title</h1>
+    <p class="text-secondary">@Model.Message</p>
+    <a class="btn btn-primary" asp-controller="Home" asp-action="Index">回首頁</a>
+</div>

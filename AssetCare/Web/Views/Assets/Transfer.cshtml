@@ -1,0 +1,59 @@
+@model AssetTransferViewModel
+@{
+    ViewData["Title"] = $"轉移 {Model.Asset.AssetNo}";
+    var a = Model.Asset;
+    var o = Model.Options;
+    // 目前值若已停用仍需列在選單中，避免未更動欄位被清掉。
+    IEnumerable<Option> Keep(IReadOnlyList<Option> options, Guid? current, string? name) =>
+        current is { } id && options.All(x => x.Id != id) ? options.Append(new Option(id, $"{name}（目前，已停用）")) : options;
+}
+<h1 class="h4 mb-1">資產轉移</h1>
+<p class="text-secondary">@a.AssetNo @a.Name</p>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h2 class="h6">目前</h2>
+        <dl class="row detail-list mb-0">
+            <dt class="col-4 col-md-2">地點</dt><dd class="col-8 col-md-10">@a.LocationPath</dd>
+            <dt class="col-4 col-md-2">部門</dt><dd class="col-8 col-md-10">@(a.DepartmentName ?? "—")</dd>
+            <dt class="col-4 col-md-2">保管人</dt><dd class="col-8 col-md-10">@(a.CustodianName ?? "—")</dd>
+        </dl>
+    </div>
+</div>
+
+<form asp-action="Transfer" asp-route-id="@a.Id" method="post" class="card" novalidate>
+    <div class="card-body row g-3">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <input type="hidden" asp-for="Version" />
+        <div class="col-md-4">
+            <label asp-for="LocationId" class="form-label"></label>
+            <select asp-for="LocationId" asp-items="Keep(o.Locations, a.LocationId, a.LocationPath).ToSelectList()" class="form-select"></select>
+            <span asp-validation-for="LocationId" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="DepartmentId" class="form-label"></label>
+            <select asp-for="DepartmentId" asp-items="Keep(o.Departments, a.DepartmentId, a.DepartmentName).ToSelectList()" class="form-select">
+                <option value="">無</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="CustodianUserId" class="form-label"></label>
+            <select asp-for="CustodianUserId" asp-items="Keep(o.Users, a.CustodianUserId, a.CustodianName).ToSelectList()" class="form-select">
+                <option value="">無</option>
+            </select>
+        </div>
+        <div class="col-12">
+            <label asp-for="Reason" class="form-label"></label>
+            <textarea asp-for="Reason" class="form-control" rows="2" maxlength="500"></textarea>
+            <span asp-validation-for="Reason" class="text-danger small"></span>
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">確認轉移</button>
+            <a class="btn btn-outline-secondary btn-lg" asp-action="Details" asp-route-id="@a.Id">取消</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

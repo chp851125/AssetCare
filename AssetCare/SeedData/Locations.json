@@ -1,0 +1,68 @@
+[
+  {
+    "code": "HQ",
+    "name": "台北總部大樓",
+    "parentId": null,
+    "sortOrder": 10,
+    "isActive": true,
+    "id": "91a33c52-0376-d061-98f1-ad988bc7457a",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  },
+  {
+    "code": "HQ-2F",
+    "name": "總部 2F 行政辦公區",
+    "parentId": "91a33c52-0376-d061-98f1-ad988bc7457a",
+    "sortOrder": 20,
+    "isActive": true,
+    "id": "1aec8e5b-562b-4b8e-9805-b0cb8033dbf1",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  },
+  {
+    "code": "HQ-3F",
+    "name": "總部 3F 研發辦公區",
+    "parentId": "91a33c52-0376-d061-98f1-ad988bc7457a",
+    "sortOrder": 30,
+    "isActive": true,
+    "id": "39841595-f53f-80d3-db3d-9eac4f7e73b8",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  },
+  {
+    "code": "HQ-3F-SR",
+    "name": "3F 資訊機房",
+    "parentId": "39841595-f53f-80d3-db3d-9eac4f7e73b8",
+    "sortOrder": 40,
+    "isActive": true,
+    "id": "497ee2d2-f8b4-fb86-ae58-f97152965064",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  },
+  {
+    "code": "LK",
+    "name": "林口廠",
+    "parentId": null,
+    "sortOrder": 50,
+    "isActive": true,
+    "id": "7503bc15-0c42-663b-bb6c-3eedb7e1fb19",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  },
+  {
+    "code": "LK-1F",
+    "name": "林口廠 1F 生產區",
+    "parentId": "7503bc15-0c42-663b-bb6c-3eedb7e1fb19",
+    "sortOrder": 60,
+    "isActive": true,
+    "id": "9df9f891-92b4-9c3d-8e88-8ae7fb612d45",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  }
+]

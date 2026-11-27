@@ -1,0 +1,46 @@
+@model AssetImportViewModel
+@{ ViewData["Title"] = "匯入資產"; }
+<a class="d-inline-block mb-2" asp-action="Index"><i class="bi bi-chevron-left"></i> 資產清單</a>
+<h1 class="h4 mb-3">批次匯入資產</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <ol class="mb-3">
+            <li>下載匯入範本，於「匯入資料」工作表逐列填寫。</li>
+            <li>類別、地點、部門代碼請參考範本中的「代碼對照」。</li>
+            <li>全部資料列通過檢查才會匯入；任一列有誤則整批不匯入。</li>
+        </ol>
+        <a class="btn btn-outline-primary mb-3" asp-action="ImportTemplate"><i class="bi bi-download"></i> 下載匯入範本</a>
+        <form asp-action="Import" method="post" enctype="multipart/form-data" class="row g-2">
+            <div asp-validation-summary="All" class="alert alert-danger"></div>
+            <div class="col-md-8">
+                <input type="file" class="form-control" name="file" accept=".xlsx" required aria-label="Excel 檔案" />
+            </div>
+            <div class="col-md-4 d-grid">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> 匯入</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Result is { Succeeded: true } ok)
+{
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle me-1"></i>成功匯入 @ok.AssetNos.Count 筆資產：@string.Join("、", ok.AssetNos)
+    </div>
+}
+else if (Model.Result is { } failed)
+{
+    <div class="alert alert-danger">檢查未通過，共 @failed.Errors.Count 列有誤，未匯入任何資料。請修正後重新上傳。</div>
+    <div class="card">
+        <table class="table mb-0">
+            <thead><tr><th scope="col" class="text-nowrap">Excel 列號</th><th scope="col">問題</th></tr></thead>
+            <tbody>
+                @foreach (var error in failed.Errors)
+                {
+                    <tr><td>@error.RowNumber</td><td>@error.Message</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

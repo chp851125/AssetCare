@@ -1,0 +1,63 @@
+@model AssetLabelsViewModel
+@{
+    Layout = null;
+    var perPage = Model.Large ? 8 : 24;
+    var switchQuery = Context.Request.Query
+        .Where(q => !string.Equals(q.Key, "large", StringComparison.OrdinalIgnoreCase))
+        .SelectMany(q => q.Value, (q, v) => new KeyValuePair<string, string?>(q.Key, v))
+        .Append(new KeyValuePair<string, string?>("large", Model.Large ? "false" : "true"));
+    var switchUrl = Context.Request.PathBase + Context.Request.Path + QueryString.Create(switchQuery);
+}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Code 標籤列印 - AssetCare</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>@@page { size: A4; margin: 0; }</style>
+</head>
+<body class="label-page">
+    <div class="container-fluid py-3 d-print-none">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-chevron-left"></i> 資產清單</a>
+            <button type="button" class="btn btn-primary" data-print><i class="bi bi-printer"></i> 列印／存成 PDF</button>
+            <a class="btn btn-outline-primary" href="@switchUrl">改為每頁 @(Model.Large ? 24 : 8) 張</a>
+            <span class="text-secondary">共 @Model.Labels.Count 張，A4 每頁 @perPage 張。列印時請選擇「實際大小（100%）」。</span>
+        </div>
+        @if (Model.IsLocalAddress)
+        {
+            <div class="alert alert-warning mt-3 mb-0">
+                目前 QR Code 指向本機網址（localhost），手機無法開啟。請改用區網 IP 開啟本頁，或在設定檔指定 <code>App:PublicBaseUrl</code>。
+            </div>
+        }
+        @if (Model.Labels.Count == 0)
+        {
+            <div class="alert alert-info mt-3 mb-0">沒有可列印的資產。</div>
+        }
+    </div>
+
+    <div class="label-sheets">
+        @foreach (var page in Model.Labels.Chunk(perPage))
+        {
+            <div class="label-sheet @(Model.Large ? "label-sheet-large" : "")">
+                @foreach (var label in page)
+                {
+                    <div class="asset-label">
+                        <img src="data:image/png;base64,@Convert.ToBase64String(label.QrPng)" alt="@label.AssetNo 的 QR Code" data-url="@label.Url" />
+                        <div class="asset-label-text">
+                            <div class="asset-label-no">@label.AssetNo</div>
+                            <div class="asset-label-name">@label.Name</div>
+                            <div class="asset-label-location">@label.LocationName</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+</body>
+</html>

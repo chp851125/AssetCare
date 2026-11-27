@@ -1,0 +1,72 @@
+[
+  {
+    "ownerType": "WorkOrder",
+    "ownerId": "a279bbcb-c8b2-16a0-e4e8-c24fed6459b3",
+    "fileName": "現場照片1.png",
+    "storedFileName": "182b66061466435b8fa0250e16d80bd7.png",
+    "contentType": "image/png",
+    "sizeBytes": 4722,
+    "caption": null,
+    "uploadedByUserId": "d849e141-4870-80cf-fc47-6f07e3500453",
+    "id": "c2aafe83-c946-33ba-a3ba-131badbb0fe5",
+    "version": 1,
+    "createdAt": "2026-11-26T02:49:45Z",
+    "updatedAt": "2026-11-26T02:49:45Z"
+  },
+  {
+    "ownerType": "WorkOrder",
+    "ownerId": "89a75ec8-8e51-6601-4bbc-b3e1c25914d9",
+    "fileName": "現場照片1.png",
+    "storedFileName": "e4fd4986f4b74a1a1deff70d15181e9c.png",
+    "contentType": "image/png",
+    "sizeBytes": 4728,
+    "caption": null,
+    "uploadedByUserId": "b210a362-dfb6-c8ce-c4b6-81bcdc423c57",
+    "id": "56184d7a-44b4-3aa8-a2b0-a6aae0c7e321",
+    "version": 1,
+    "createdAt": "2026-11-27T02:19:45Z",
+    "updatedAt": "2026-11-27T02:19:45Z"
+  },
+  {
+    "ownerType": "WorkOrder",
+    "ownerId": "89a75ec8-8e51-6601-4bbc-b3e1c25914d9",
+    "fileName": "現場照片2.png",
+    "storedFileName": "7ed0fed040edca6d7434b6e73ce9beb6.png",
+    "contentType": "image/png",
+    "sizeBytes": 4750,
+    "caption": null,
+    "uploadedByUserId": "b210a362-dfb6-c8ce-c4b6-81bcdc423c57",
+    "id": "71b0038e-7a10-513f-6335-503a7a2d2c2d",
+    "version": 1,
+    "createdAt": "2026-11-27T02:20:45Z",
+    "updatedAt": "2026-11-27T02:20:45Z"
+  },
+  {
+    "ownerType": "Asset",
+    "ownerId": "c715a103-0bf9-63c4-f0fc-c84795932eb1",
+    "fileName": "CNC銘牌照片.png",
+    "storedFileName": "ea3e51940e31123573b2d5cf7f27133b.png",
+    "contentType": "image/png",
+    "sizeBytes": 4751,
+    "caption": "機台銘牌",
+    "uploadedByUserId": "c3ed4ade-51c4-7c23-9697-dbfe9115f87a",
+    "id": "94a4ceea-fc76-ca5b-05e0-17417cd15b83",
+    "version": 1,
+    "createdAt": "2026-05-11T04:48:45Z",
+    "updatedAt": "2026-05-11T04:48:45Z"
+  },
+  {
+    "ownerType": "Asset",
+    "ownerId": "d33b4a53-696a-dec1-4408-d64bcd187e7f",
+    "fileName": "滅火系統配置圖.png",
+    "storedFileName": "9f7b61d15e2cc267dd04fc9dd6c2edfb.png",
+    "contentType": "image/png",
+    "sizeBytes": 4688,
+    "caption": "鋼瓶與噴頭配置",
+    "uploadedByUserId": "eaa0e796-5102-ddbd-bf7b-18c2c28c1ae3",
+    "id": "d911ba55-6d47-bdd1-8e03-55b8b82cfeeb",
+    "version": 1,
+    "createdAt": "2026-05-31T04:48:45Z",
+    "updatedAt": "2026-05-31T04:48:45Z"
+  }
+]

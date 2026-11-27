@@ -1,0 +1,139 @@
+[
+  {
+    "name": "機房精密空調每日巡檢",
+    "assetId": "0b9076c0-9702-473f-ac0a-459841523883",
+    "cycle": "Daily",
+    "priority": "Normal",
+    "nextDueDate": "2026-11-27",
+    "leadDays": 0,
+    "lastCompletedDate": "2026-11-26",
+    "usageInterval": null,
+    "nextDueUsage": null,
+    "assigneeUserId": "afa4b9b5-beaa-8028-31ae-db5293ffb73e",
+    "checklistItems": [
+      "記錄回風溫度與濕度",
+      "確認面板無告警",
+      "檢查排水管無漏水"
+    ],
+    "isActive": true,
+    "id": "25a70ebb-5708-cba4-79ff-c3835e27aec1",
+    "version": 1,
+    "createdAt": "2026-03-22T04:48:45Z",
+    "updatedAt": "2026-03-22T04:48:45Z"
+  },
+  {
+    "name": "不斷電系統每週檢查",
+    "assetId": "17c31e25-2d88-267a-0de9-a73d807d17a7",
+    "cycle": "Weekly",
+    "priority": "Normal",
+    "nextDueDate": "2026-11-29",
+    "leadDays": 3,
+    "lastCompletedDate": "2026-11-22",
+    "usageInterval": null,
+    "nextDueUsage": null,
+    "assigneeUserId": "afa4b9b5-beaa-8028-31ae-db5293ffb73e",
+    "checklistItems": [
+      "確認負載率低於 80%",
+      "檢查電池健康狀態",
+      "清潔進風口",
+      "查看事件紀錄"
+    ],
+    "isActive": true,
+    "id": "0ae4ba0f-0095-8c49-26d7-fff4148338de",
+    "version": 1,
+    "createdAt": "2026-03-22T04:48:45Z",
+    "updatedAt": "2026-03-22T04:48:45Z"
+  },
+  {
+    "name": "空氣壓縮機月保養",
+    "assetId": "e3b9da8c-cf1c-1d7d-cc1d-38500facf3c8",
+    "cycle": "Monthly",
+    "priority": "Normal",
+    "nextDueDate": "2026-11-21",
+    "leadDays": 7,
+    "lastCompletedDate": "2026-10-22",
+    "usageInterval": null,
+    "nextDueUsage": null,
+    "assigneeUserId": "c3ed4ade-51c4-7c23-9697-dbfe9115f87a",
+    "checklistItems": [
+      "清潔或更換空氣濾清器",
+      "檢查潤滑油位",
+      "排放儲氣桶積水",
+      "檢查皮帶張力"
+    ],
+    "isActive": true,
+    "id": "eca9a73d-cd16-3c7a-c62a-323c5e8a944b",
+    "version": 1,
+    "createdAt": "2026-03-22T04:48:45Z",
+    "updatedAt": "2026-03-22T04:48:45Z"
+  },
+  {
+    "name": "堆高機季保養",
+    "assetId": "7cf8f9be-f8ed-b846-acb9-9aa2caf11031",
+    "cycle": "Quarterly",
+    "priority": "High",
+    "nextDueDate": "2026-11-09",
+    "leadDays": 14,
+    "lastCompletedDate": "2026-08-11",
+    "usageInterval": null,
+    "nextDueUsage": null,
+    "assigneeUserId": "c3ed4ade-51c4-7c23-9697-dbfe9115f87a",
+    "checklistItems": [
+      "檢查煞車與轉向",
+      "檢查油壓缸與鏈條",
+      "電瓶液位與接頭清潔",
+      "警示燈與喇叭測試"
+    ],
+    "isActive": true,
+    "id": "9e92c68e-ff63-bbfe-c51b-ff3158b0b6f5",
+    "version": 1,
+    "createdAt": "2026-03-22T04:48:45Z",
+    "updatedAt": "2026-03-22T04:48:45Z"
+  },
+  {
+    "name": "火警受信總機年度檢修",
+    "assetId": "40d482cc-fbb6-c98f-7091-fdc8fe0d881f",
+    "cycle": "Yearly",
+    "priority": "High",
+    "nextDueDate": "2027-11-03",
+    "leadDays": 14,
+    "lastCompletedDate": "2026-11-03",
+    "usageInterval": null,
+    "nextDueUsage": null,
+    "assigneeUserId": "bf9d5007-3fc6-f9d4-c5a1-b983fa9881ed",
+    "checklistItems": [
+      "各迴路動作測試",
+      "備用電源放電測試",
+      "探測器抽樣測試",
+      "製作檢修紀錄表"
+    ],
+    "isActive": true,
+    "id": "b745e4c7-c27e-42aa-40a7-436ace0c2e9c",
+    "version": 1,
+    "createdAt": "2026-03-22T04:48:45Z",
+    "updatedAt": "2026-11-03T10:52:23Z"
+  },
+  {
+    "name": "CNC 主軸每 2000 小時保養",
+    "assetId": "c715a103-0bf9-63c4-f0fc-c84795932eb1",
+    "cycle": "ByUsage",
+    "priority": "Normal",
+    "nextDueDate": null,
+    "leadDays": 0,
+    "lastCompletedDate": null,
+    "usageInterval": 2000,
+    "nextDueUsage": 8000,
+    "assigneeUserId": "c3ed4ade-51c4-7c23-9697-dbfe9115f87a",
+    "checklistItems": [
+      "主軸振動值量測",
+      "更換潤滑油",
+      "檢查傳動皮帶",
+      "精度校正確認"
+    ],
+    "isActive": true,
+    "id": "4d66b342-9af0-3e7b-a8ee-26facd49e316",
+    "version": 1,
+    "createdAt": "2026-03-22T04:48:45Z",
+    "updatedAt": "2026-03-22T04:48:45Z"
+  }
+]

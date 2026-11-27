@@ -1,0 +1,222 @@
+@model AssetIndexViewModel
+@{
+    ViewData["Title"] = "資產清單";
+    var q = Model.Query;
+    var isManager = User.IsManager();
+    var isStaff = User.IsStaff();
+    var filtered = !string.IsNullOrWhiteSpace(q.Keyword) || q.CategoryId != null || q.LocationId != null ||
+                   q.DepartmentId != null || q.Status != null || q.Warranty != null;
+    // 匯出與列印沿用目前篩選條件。
+    var filterRoute = new Dictionary<string, string>();
+    foreach (var item in Context.Request.Query.Where(x => !string.Equals(x.Key, "page", StringComparison.OrdinalIgnoreCase)))
+    {
+        filterRoute[item.Key] = item.Value.ToString();
+    }
+    var sortNames = new Dictionary<AssetSort, string>
+    {
+        [AssetSort.AssetNo] = "資產編號", [AssetSort.Name] = "名稱", [AssetSort.Category] = "類別",
+        [AssetSort.Status] = "狀態", [AssetSort.Location] = "地點", [AssetSort.PurchaseDate] = "購入日期",
+        [AssetSort.Warranty] = "保固到期日"
+    };
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 mb-0">資產清單</h1>
+    @if (isStaff)
+    {
+        <div class="d-flex flex-wrap gap-2">
+            @if (isManager)
+            {
+                <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> 新增資產</a>
+                <a class="btn btn-outline-primary" asp-action="Import"><i class="bi bi-upload"></i> 匯入</a>
+                <a class="btn btn-outline-primary" asp-action="Export" asp-all-route-data="filterRoute"><i class="bi bi-file-earmark-excel"></i> 匯出</a>
+                <a class="btn btn-outline-secondary" asp-controller="Categories" asp-action="Index"><i class="bi bi-tags"></i> 類別</a>
+                <a class="btn btn-outline-secondary" asp-controller="Locations" asp-action="Index"><i class="bi bi-geo-alt"></i> 地點</a>
+            }
+            <a class="btn btn-outline-secondary" asp-action="Labels" asp-all-route-data="filterRoute" title="列印目前篩選結果（不含已報廢）"><i class="bi bi-qr-code"></i> 列印全部標籤</a>
+        </div>
+    }
+</div>
+
+<form method="get" asp-action="Index" class="card mb-3">
+    <div class="card-body">
+        <div class="input-group">
+            <input type="search" class="form-control" name="Keyword" value="@q.Keyword" placeholder="編號、名稱、廠牌、型號、序號" aria-label="關鍵字" />
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> 搜尋</button>
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#assetFilters" aria-expanded="@(filtered ? "true" : "false")" aria-controls="assetFilters">
+                <i class="bi bi-funnel"></i><span class="visually-hidden">篩選與排序</span>
+            </button>
+        </div>
+        <div class="collapse @(filtered ? "show" : "")" id="assetFilters">
+            <div class="row g-2 mt-1">
+                <div class="col-6 col-md-4 col-xl-2">
+                    <label class="form-label small mb-1" for="f-category">類別</label>
+                    <select class="form-select" id="f-category" name="CategoryId" asp-for="Query.CategoryId" asp-items="Model.Options.Categories.ToSelectList()">
+                        <option value="">全部</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <label class="form-label small mb-1" for="f-location">地點（含下層）</label>
+                    <select class="form-select" id="f-location" name="LocationId" asp-for="Query.LocationId" asp-items="Model.Options.Locations.ToSelectList()">
+                        <option value="">全部</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <label class="form-label small mb-1" for="f-department">部門</label>
+                    <select class="form-select" id="f-department" name="DepartmentId" asp-for="Query.DepartmentId" asp-items="Model.Options.Departments.ToSelectList()">
+                        <option value="">全部</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <label class="form-label small mb-1" for="f-status">狀態</label>
+                    <select class="form-select" id="f-status" name="Status">
+                        <option value="">全部</option>
+                        @foreach (var s in Enum.GetValues<AssetStatus>())
+                        {
+                            <option value="@s" selected="@(q.Status == s)">@s.Label()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <label class="form-label small mb-1" for="f-warranty">保固</label>
+                    <select class="form-select" id="f-warranty" name="Warranty">
+                        <option value="">全部</option>
+                        @foreach (var w in Enum.GetValues<WarrantyState>())
+                        {
+                            <option value="@w" selected="@(q.Warranty == w)">@w.Label()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <label class="form-label small mb-1" for="f-sort">排序</label>
+                    <div class="input-group">
+                        <select class="form-select" id="f-sort" name="Sort">
+                            @foreach (var pair in sortNames)
+                            {
+                                <option value="@pair.Key" selected="@(q.Sort == pair.Key)">@pair.Value</option>
+                            }
+                        </select>
+                        <select class="form-select" name="Desc" aria-label="排序方向">
+                            <option value="false" selected="@(!q.Desc)">升冪</option>
+                            <option value="true" selected="@q.Desc">降冪</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-12 d-flex gap-2 justify-content-end">
+                    <a class="btn btn-link" asp-action="Index">清除條件</a>
+                    <button type="submit" class="btn btn-primary">套用</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@if (Model.Result.Total == 0)
+{
+    <div class="empty-state">
+        <i class="bi bi-pc-display"></i>
+        <p class="text-secondary">沒有符合條件的資產。</p>
+    </div>
+}
+else
+{
+    <form method="get" asp-action="Labels" id="labelForm" data-require-checked="ids">
+        @if (isStaff)
+        {
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <label class="form-check mb-0 py-2">
+                    <input type="checkbox" class="form-check-input" data-check-all="ids" />
+                    <span class="form-check-label">本頁全選</span>
+                </label>
+                <button type="submit" class="btn btn-outline-primary" data-needs-checked><i class="bi bi-printer"></i> 列印勾選標籤</button>
+            </div>
+        }
+
+        <div class="d-lg-none">
+            @foreach (var a in Model.Result.Items)
+            {
+                <div class="card mb-2">
+                    <div class="card-body d-flex gap-2 py-2">
+                        @if (isStaff)
+                        {
+                            <label class="touch-check"><input type="checkbox" class="form-check-input" name="ids" value="@a.Id" aria-label="勾選 @a.AssetNo" /></label>
+                        }
+                        <a class="flex-grow-1 text-reset text-decoration-none min-w-0" asp-action="Details" asp-route-id="@a.Id">
+                            <div class="d-flex justify-content-between gap-2">
+                                <span class="small text-secondary">@a.AssetNo</span>
+                                <span class="badge @a.Status.BadgeClass()">@a.Status.Label()</span>
+                            </div>
+                            <div class="fw-semibold">@a.Name</div>
+                            <div class="small text-secondary">@a.CategoryName・@a.LocationName・@(a.CustodianName ?? "無保管人")</div>
+                            @if (a.Warranty is WarrantyState.Expiring or WarrantyState.Expired)
+                            {
+                                <span class="badge @a.Warranty.BadgeClass()">@a.Warranty.Label() @a.WarrantyEndDate?.ToString("yyyy/MM/dd")</span>
+                            }
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="card d-none d-lg-block">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            @if (isStaff) { <th scope="col"><span class="visually-hidden">勾選</span></th> }
+                            @foreach (var pair in sortNames)
+                            {
+                                var current = q.Sort == pair.Key;
+                                var route = new Dictionary<string, string>(filterRoute, StringComparer.OrdinalIgnoreCase)
+                                {
+                                    ["Sort"] = pair.Key.ToString(),
+                                    ["Desc"] = (current && !q.Desc) ? "true" : "false"
+                                };
+                                <th scope="col" class="text-nowrap" aria-sort="@(current ? q.Desc ? "descending" : "ascending" : null)">
+                                    <a class="sort-link" asp-action="Index" asp-all-route-data="route">
+                                        @pair.Value
+                                        @if (current) { <i class="bi @(q.Desc ? "bi-caret-down-fill" : "bi-caret-up-fill")"></i> }
+                                    </a>
+                                </th>
+                            }
+                            <th scope="col">保管人</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in Model.Result.Items)
+                        {
+                            <tr>
+                                @if (isStaff)
+                                {
+                                    <td><input type="checkbox" class="form-check-input" name="ids" value="@a.Id" aria-label="勾選 @a.AssetNo" /></td>
+                                }
+                                <td class="text-nowrap"><a asp-action="Details" asp-route-id="@a.Id">@a.AssetNo</a></td>
+                                <td>@a.Name</td>
+                                <td>@a.CategoryName</td>
+                                <td><span class="badge @a.Status.BadgeClass()">@a.Status.Label()</span></td>
+                                <td>@a.LocationName</td>
+                                <td class="text-nowrap">@a.PurchaseDate.ToString("yyyy/MM/dd")</td>
+                                <td class="text-nowrap">
+                                    @if (a.WarrantyEndDate is { } end)
+                                    {
+                                        <span class="me-1">@end.ToString("yyyy/MM/dd")</span>
+                                        @if (a.Warranty is WarrantyState.Expiring or WarrantyState.Expired)
+                                        {
+                                            <span class="badge @a.Warranty.BadgeClass()">@(a.Warranty == WarrantyState.Expired ? "已過期" : "即將到期")</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-secondary">—</span>
+                                    }
+                                </td>
+                                <td>@(a.CustodianName ?? "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+}
+<partial name="_Pager" model="PagerViewModel.From(Model.Result)" />

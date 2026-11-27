@@ -6,4 +6,18 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
+    <PackageReference Include="QRCoder" Version="1.9.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="11.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 執行期資料不納入建置與發佈 -->
+    <Content Remove="App_Data\**" />
+    <None Remove="App_Data\**" />
+    <!-- 範例附件隨發佈複製（JSON 由 Web SDK 預設處理） -->
+    <Content Include="SeedData\uploads\**" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

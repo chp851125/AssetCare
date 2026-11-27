@@ -1,0 +1,81 @@
+@{
+    var signedIn = User.Identity?.IsAuthenticated == true;
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    string Active(string name) => controller == name ? "active" : "";
+    var displayName = User.FindFirst(AppClaimTypes.DisplayName)?.Value;
+    var roleLabel = Enum.GetValues<UserRole>().Where(r => User.IsInRole(r.ToString())).Select(r => r.Label()).FirstOrDefault();
+}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>@ViewData["Title"] - AssetCare 設備管理</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="@(signedIn ? "has-bottom-nav" : "")">
+    <header class="navbar navbar-dark app-navbar sticky-top">
+        <div class="container-fluid flex-nowrap gap-2">
+            <a class="navbar-brand me-0 me-lg-3" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-wrench-adjustable-circle"></i> AssetCare
+            </a>
+            @if (signedIn)
+            {
+                <ul class="navbar-nav flex-row gap-3 me-auto d-none d-lg-flex">
+                    <li class="nav-item"><a class="nav-link @Active("Home")" asp-controller="Home" asp-action="Index">首頁</a></li>
+                    <li class="nav-item"><a class="nav-link @(Active("Assets") + Active("Categories") + Active("Locations"))" asp-controller="Assets" asp-action="Index">資產</a></li>
+                    <li class="nav-item"><a class="nav-link @Active("Scan")" asp-controller="Scan" asp-action="Index">掃碼</a></li>
+                    <li class="nav-item"><a class="nav-link @Active("WorkOrders")" asp-controller="WorkOrders" asp-action="Mine">我的工單</a></li>
+                    @if (User.IsInRole(Roles.Admin))
+                    {
+                        <li class="nav-item"><a class="nav-link @(Active("Admin") + Active("Users"))" asp-controller="Admin" asp-action="Index">系統管理</a></li>
+                    }
+                </ul>
+            }
+            <div class="d-flex align-items-center gap-1 gap-sm-2 ms-auto">
+                @await Component.InvokeAsync("DevToolbar")
+                @if (signedIn)
+                {
+                    <a class="btn btn-link nav-icon position-relative d-none d-lg-inline-block" asp-controller="Notifications" asp-action="Index" aria-label="通知">
+                        <i class="bi bi-bell"></i>
+                        @await Component.InvokeAsync("NotificationBadge")
+                    </a>
+                    <div class="dropdown d-none d-lg-block">
+                        <button class="btn btn-link nav-link dropdown-toggle text-white" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> @displayName <span class="small opacity-75">@roleLabel</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" asp-controller="Profile" asp-action="Index"><i class="bi bi-person"></i> 個人資料</a></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right"></i> 登出</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                }
+            </div>
+        </div>
+    </header>
+
+    <main class="container-xl py-3">
+        <partial name="_Alerts" />
+        @RenderBody()
+    </main>
+
+    @if (signedIn)
+    {
+        <partial name="_BottomNav" />
+    }
+    <partial name="_ConfirmModal" />
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

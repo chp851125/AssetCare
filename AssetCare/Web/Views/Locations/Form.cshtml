@@ -1,0 +1,47 @@
+@model LocationFormViewModel
+@{
+    var isNew = Model.Id is null;
+    ViewData["Title"] = isNew ? "新增地點" : "編輯地點";
+}
+<h1 class="h4 mb-3">@ViewData["Title"]</h1>
+<form asp-action="@(isNew ? "Create" : "Edit")" asp-route-id="@Model.Id" method="post" class="card" novalidate>
+    <div class="card-body row g-3">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <input type="hidden" asp-for="Version" />
+        <div class="col-md-4">
+            <label asp-for="Code" class="form-label"></label>
+            <input asp-for="Code" class="form-control text-uppercase" maxlength="20" />
+            <span asp-validation-for="Code" class="text-danger small"></span>
+        </div>
+        <div class="col-md-8">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" maxlength="50" />
+            <span asp-validation-for="Name" class="text-danger small"></span>
+        </div>
+        <div class="col-md-8">
+            <label asp-for="ParentId" class="form-label"></label>
+            <select asp-for="ParentId" asp-items="Model.ParentOptions.ToSelectList()" class="form-select">
+                <option value="">（最上層）</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="SortOrder" class="form-label"></label>
+            <input asp-for="SortOrder" type="number" min="0" max="100000" class="form-control" />
+            <span asp-validation-for="SortOrder" class="text-danger small"></span>
+        </div>
+        <div class="col-12">
+            <div class="form-check form-switch">
+                <input asp-for="IsActive" class="form-check-input" />
+                <label asp-for="IsActive" class="form-check-label"></label>
+            </div>
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">儲存</button>
+            <a class="btn btn-outline-secondary btn-lg" asp-action="Index">取消</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
