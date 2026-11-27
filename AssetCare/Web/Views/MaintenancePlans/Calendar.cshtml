@@ -1,0 +1,24 @@
+@{
+    ViewData["Title"] = "保養行事曆";
+}
+<a class="d-inline-block mb-2" asp-action="Index"><i class="bi bi-chevron-left"></i> 保養計畫</a>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+    <h1 class="h4 mb-0">保養行事曆</h1>
+    <div class="small">
+        <span class="badge event-order">已產生工單</span>
+        <span class="badge event-planned">預定</span>
+        <span class="badge event-overdue">逾期</span>
+    </div>
+</div>
+<p class="small text-secondary">工單顯示在完工期限當天；「預定」依下次保養日推估，實際日期於完工後重算。依使用量的計畫不顯示預定日。</p>
+<div id="calendarError" class="alert alert-danger d-none" role="alert">行事曆資料載入失敗，請重新整理頁面。</div>
+<div class="card">
+    <div class="card-body p-2">
+        <div id="maintenanceCalendar" data-events="@Url.Action("Events")" data-today="@Clock.Today.ToString("yyyy-MM-dd")"></div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/lib/fullcalendar/index.global.min.js"></script>
+    <script src="~/lib/fullcalendar/zh-tw.global.min.js"></script>
+    <script src="~/js/calendar.js" asp-append-version="true"></script>
+}

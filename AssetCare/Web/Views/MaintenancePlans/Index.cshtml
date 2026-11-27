@@ -1,0 +1,109 @@
+@model PlanIndexViewModel
+@{
+    ViewData["Title"] = "預防保養";
+    var q = Model.Query;
+    var isManager = User.IsManager();
+    string Next(PlanListItem p) => p.Cycle == MaintenanceCycle.ByUsage
+        ? $"{p.NextDueUsage:N0} {p.UsageUnit}（目前 {p.CurrentUsage ?? 0:N0}）"
+        : p.NextDueDate?.ToString("yyyy/MM/dd") ?? "—";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 mb-0">預防保養</h1>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-primary" asp-action="Calendar"><i class="bi bi-calendar3"></i> 行事曆</a>
+        @if (isManager)
+        {
+            <form asp-action="Generate" method="post">
+                <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-arrow-repeat"></i> 檢查並產生工單</button>
+            </form>
+            <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> 新增計畫</a>
+        }
+    </div>
+</div>
+
+<form method="get" asp-action="Index" class="card mb-3">
+    <div class="card-body row g-2">
+        <div class="col-12 col-lg-5">
+            <input type="search" class="form-control" name="Keyword" value="@q.Keyword" placeholder="計畫名稱、資產編號或名稱" aria-label="關鍵字" />
+        </div>
+        <div class="col-6 col-lg-2">
+            <select class="form-select" name="Cycle" aria-label="週期">
+                <option value="">全部週期</option>
+                @foreach (var c in Enum.GetValues<MaintenanceCycle>())
+                {
+                    <option value="@c" selected="@(q.Cycle == c)">@c.Label()</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-2">
+            <select class="form-select" name="State" aria-label="到期狀態">
+                <option value="">全部狀態</option>
+                @foreach (var state in Enum.GetValues<MaintenanceDueState>())
+                {
+                    <option value="@state" selected="@(q.State == state)">@state.Label()</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-2">
+            <label class="form-check py-2 mb-0">
+                <input type="checkbox" class="form-check-input" name="Mine" value="true" checked="@q.Mine" />
+                <span class="form-check-label">我負責的</span>
+            </label>
+        </div>
+        <div class="col-6 col-lg-1 d-grid">
+            <button type="submit" class="btn btn-primary" aria-label="搜尋"><i class="bi bi-search"></i></button>
+        </div>
+    </div>
+</form>
+
+@if (Model.Result.Total == 0)
+{
+    <div class="empty-state"><i class="bi bi-calendar-check"></i><p class="text-secondary">沒有符合條件的保養計畫。</p></div>
+}
+else
+{
+    <div class="d-lg-none">
+        @foreach (var p in Model.Result.Items)
+        {
+            <a class="card mb-2 text-reset text-decoration-none @(p.State == MaintenanceDueState.Overdue ? "border-danger" : "")" asp-action="Details" asp-route-id="@p.Id">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between gap-2">
+                        <span class="small text-secondary">@p.Cycle.Label()</span>
+                        <span class="badge @p.State.BadgeClass()">@p.State.Label()</span>
+                    </div>
+                    <div class="fw-semibold">@p.Name</div>
+                    <div class="small text-secondary">@p.AssetNo @p.AssetName</div>
+                    <div class="small">下次：@Next(p)・負責人：@(p.AssigneeName ?? "未指派")</div>
+                </div>
+            </a>
+        }
+    </div>
+
+    <div class="card d-none d-lg-block">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">計畫名稱</th><th scope="col">資產</th><th scope="col">週期</th>
+                        <th scope="col">下次保養</th><th scope="col">上次完成</th><th scope="col">負責人</th><th scope="col">狀態</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Result.Items)
+                    {
+                        <tr class="@(p.State == MaintenanceDueState.Overdue ? "table-danger" : "")">
+                            <td><a asp-action="Details" asp-route-id="@p.Id">@p.Name</a></td>
+                            <td>@p.AssetNo @p.AssetName</td>
+                            <td class="text-nowrap">@p.Cycle.Label()</td>
+                            <td>@Next(p)</td>
+                            <td class="text-nowrap">@(p.LastCompletedDate?.ToString("yyyy/MM/dd") ?? "—")</td>
+                            <td class="text-nowrap">@(p.AssigneeName ?? "未指派")</td>
+                            <td><span class="badge @p.State.BadgeClass()">@p.State.Label()</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+<partial name="_Pager" model="PagerViewModel.From(Model.Result)" />

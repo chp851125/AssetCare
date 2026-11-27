@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "完工回報";
     var c = Model.Context;
+    var preventive = c.Type == WorkOrderType.Preventive;
 }
 <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-6">
@@ -12,13 +13,20 @@
         <form asp-action="Complete" asp-route-id="@c.Id" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
             <input type="hidden" asp-for="Version" />
+            @if (c.Checklist.Count > 0)
+            {
+                <fieldset class="mb-3">
+                    <legend class="form-label fs-6">保養檢查清單</legend>
+                    <partial name="_ChecklistInput" model="new ChecklistInputViewModel(c.Checklist, Model.Checklist)" />
+                </fieldset>
+            }
             <div class="mb-3">
-                <label asp-for="FaultCause" class="form-label"></label>
+                <label asp-for="FaultCause" class="form-label">@(preventive ? "保養狀況" : "故障原因")</label>
                 <textarea asp-for="FaultCause" class="form-control" rows="2" maxlength="1000"></textarea>
                 <span asp-validation-for="FaultCause" class="text-danger small"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Resolution" class="form-label"></label>
+                <label asp-for="Resolution" class="form-label">@(preventive ? "處理內容" : "處理方式")</label>
                 <textarea asp-for="Resolution" class="form-control" rows="3" maxlength="1000"></textarea>
                 <span asp-validation-for="Resolution" class="text-danger small"></span>
             </div>

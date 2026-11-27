@@ -31,11 +31,16 @@
                     <li class="nav-item"><a class="nav-link @Active("WorkOrders")" asp-controller="WorkOrders" asp-action="Mine">工單</a></li>
                     @if (User.IsStaff())
                     {
+                        <li class="nav-item"><a class="nav-link @Active("MaintenancePlans")" asp-controller="MaintenancePlans" asp-action="Index">保養</a></li>
                         <li class="nav-item"><a class="nav-link @(Active("Parts") + Active("Vendors"))" asp-controller="Parts" asp-action="Index">零件</a></li>
+                    }
+                    @if (User.IsManager())
+                    {
+                        <li class="nav-item"><a class="nav-link @Active("Reports")" asp-controller="Reports" asp-action="Index">報表</a></li>
                     }
                     @if (User.IsInRole(Roles.Admin))
                     {
-                        <li class="nav-item"><a class="nav-link @(Active("Admin") + Active("Users"))" asp-controller="Admin" asp-action="Index">系統管理</a></li>
+                        <li class="nav-item"><a class="nav-link @(Active("Admin") + Active("Users") + Active("Settings") + Active("AuditLogs"))" asp-controller="Admin" asp-action="Index">系統管理</a></li>
                     }
                 </ul>
             }

@@ -1,0 +1,108 @@
+@model PlanDetail
+@{
+    var p = Model;
+    ViewData["Title"] = p.Name;
+    var byUsage = p.Cycle == MaintenanceCycle.ByUsage;
+    string Date(DateOnly? value) => value?.ToString("yyyy/MM/dd") ?? "—";
+}
+<a class="d-inline-block mb-2" asp-action="Index"><i class="bi bi-chevron-left"></i> 保養計畫</a>
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <h1 class="h4 mb-1">@p.Name</h1>
+        <span class="badge @p.State.BadgeClass()">@p.State.Label()</span>
+        <span class="badge @p.Priority.BadgeClass()">優先級：@p.Priority.Label()</span>
+    </div>
+    @if (p.CanManage)
+    {
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@p.Id"><i class="bi bi-pencil"></i> 編輯</a>
+            <form asp-action="SetActive" asp-route-id="@p.Id" method="post"
+                  data-confirm="@(p.IsActive ? "停用後不再自動產生工單，確定停用？" : "確定啟用此保養計畫？")">
+                <input type="hidden" name="version" value="@p.Version" />
+                <input type="hidden" name="isActive" value="@(p.IsActive ? "false" : "true")" />
+                <button type="submit" class="btn @(p.IsActive ? "btn-outline-danger" : "btn-outline-success")">@(p.IsActive ? "停用" : "啟用")</button>
+            </form>
+        </div>
+    }
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">計畫內容</h2>
+                <dl class="row detail-list mb-0">
+                    <dt class="col-4">資產</dt><dd class="col-8"><a asp-controller="Assets" asp-action="Details" asp-route-id="@p.AssetId">@p.AssetNo @p.AssetName</a></dd>
+                    <dt class="col-4">週期</dt><dd class="col-8">@p.Cycle.Label()</dd>
+                    @if (byUsage)
+                    {
+                        <dt class="col-4">間隔</dt><dd class="col-8">每 @p.UsageInterval?.ToString("N0") @p.UsageUnit</dd>
+                        <dt class="col-4">下次保養</dt><dd class="col-8">累計 @p.NextDueUsage?.ToString("N0") @p.UsageUnit</dd>
+                        <dt class="col-4">目前使用量</dt><dd class="col-8">@((p.CurrentUsage ?? 0).ToString("N0")) @p.UsageUnit</dd>
+                    }
+                    else
+                    {
+                        <dt class="col-4">下次保養日</dt><dd class="col-8">@Date(p.NextDueDate)</dd>
+                        <dt class="col-4">提前產生</dt><dd class="col-8">保養日前 @p.LeadDays 天</dd>
+                    }
+                    <dt class="col-4">上次完成</dt><dd class="col-8">@Date(p.LastCompletedDate)</dd>
+                    <dt class="col-4">負責人</dt><dd class="col-8">@(p.AssigneeName ?? "未指派（工單產生後待派工）")</dd>
+                </dl>
+                @if (p.CanRecordUsage)
+                {
+                    <hr />
+                    <form asp-action="RecordUsage" asp-route-id="@p.Id" method="post" class="row g-2 align-items-end">
+                        <input type="hidden" name="assetVersion" value="@p.AssetVersion" />
+                        <div class="col-8">
+                            <label class="form-label small mb-1" for="usage">登錄目前累計使用量（@p.UsageUnit）</label>
+                            <input type="number" class="form-control" id="usage" name="usage" step="0.01" min="@(p.CurrentUsage ?? 0)" required inputmode="decimal" />
+                        </div>
+                        <div class="col-4 d-grid"><button type="submit" class="btn btn-primary">登錄</button></div>
+                    </form>
+                }
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-5">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">檢查清單</h2>
+                <ol class="mb-0">
+                    @foreach (var item in p.ChecklistItems)
+                    {
+                        <li>@item</li>
+                    }
+                </ol>
+            </div>
+        </section>
+    </div>
+    <div class="col-12">
+        <section class="card">
+            <div class="card-body">
+                <h2 class="h5">保養紀錄</h2>
+                @if (p.Orders.Count == 0)
+                {
+                    <p class="text-secondary mb-0">尚未產生保養工單。</p>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var w in p.Orders)
+                        {
+                            <a class="list-group-item list-group-item-action px-0" asp-controller="WorkOrders" asp-action="Details" asp-route-id="@w.Id">
+                                <div class="d-flex justify-content-between gap-2">
+                                    <span>@w.OrderNo</span>
+                                    <span class="text-nowrap">
+                                        @if (w.Overdue) { <span class="badge text-bg-danger">逾期</span> }
+                                        <span class="badge @w.Status.BadgeClass()">@w.Status.Label()</span>
+                                    </span>
+                                </div>
+                                <div class="small text-secondary">週期 @w.CycleKey.Replace("usage:", "使用量 ")・產生 @Clock.Format(w.CreatedAt, "yyyy/MM/dd")・完工 @Clock.Format(w.CompletedAt, "yyyy/MM/dd")・@(w.AssigneeName ?? "未指派")</div>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+    </div>
+</div>

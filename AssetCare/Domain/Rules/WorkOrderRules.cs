@@ -26,6 +26,10 @@ public static class WorkOrderRules
         (order.Status != WorkOrderStatus.Cancelled &&
          SlaRules.IsOverdue(order.ResolveDueAt, order.CompletedAt, nowUtc));
 
+    /// <summary>外送費用的歸屬日期：回廠日；再次外送尚未送回時以外送日計。</summary>
+    public static DateOnly? VendorCostDate(WorkOrder order) =>
+        order.VendorCost > 0 ? order.ReturnedDate ?? order.SentOutDate : null;
+
     /// <summary>
     /// 是否列入「近期重複報修」：未取消的報修工單，且建立時間距今不超過指定天數（剛好滿天數仍算）。
     /// </summary>

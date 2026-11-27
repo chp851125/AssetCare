@@ -1,0 +1,52 @@
+@model SettingsViewModel
+@{
+    ViewData["Title"] = "系統參數";
+    var index = 0;
+}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <a class="d-inline-block mb-2" asp-controller="Admin" asp-action="Index"><i class="bi bi-chevron-left"></i> 系統管理</a>
+        <h1 class="h4 mb-1">系統參數</h1>
+        <p class="text-secondary">SLA 時限只套用到修改後新開立的工單。</p>
+        <form asp-action="Index" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+            @foreach (var group in Model.Items.GroupBy(i => i.Group))
+            {
+                <section class="card mb-3">
+                    <div class="card-body">
+                        <h2 class="h5">@group.Key</h2>
+                        @foreach (var item in group)
+                        {
+                            var value = Model.Posted.TryGetValue(item.Id, out var posted) ? posted : item.Value;
+                            var field = $"setting{index}";
+                            <input type="hidden" name="items[@index].Id" value="@item.Id" />
+                            <input type="hidden" name="items[@index].Version" value="@item.Version" />
+                            <div class="row g-2 align-items-center mb-2">
+                                <label class="col-12 col-sm-7 col-form-label" for="@field">@item.Description</label>
+                                <div class="col-12 col-sm-5">
+                                    @if (item.Kind == SettingKind.Boolean)
+                                    {
+                                        <select class="form-select" id="@field" name="items[@index].Value">
+                                            <option value="true" selected="@(value == "true")">是</option>
+                                            <option value="false" selected="@(value == "false")">否</option>
+                                        </select>
+                                    }
+                                    else if (item.Kind == SettingKind.Number)
+                                    {
+                                        <input type="number" class="form-control" id="@field" name="items[@index].Value" value="@value" min="@item.Min" max="@item.Max" step="1" required inputmode="numeric" />
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control" id="@field" name="items[@index].Value" value="@value" maxlength="200" required />
+                                    }
+                                </div>
+                            </div>
+                            index++;
+                        }
+                    </div>
+                </section>
+            }
+            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save"></i> 儲存</button>
+        </form>
+    </div>
+</div>

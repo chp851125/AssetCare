@@ -1,0 +1,15 @@
+@model ChecklistInputViewModel
+<ul class="list-group mb-2">
+    @for (var i = 0; i < Model.Items.Count; i++)
+    {
+        var item = Model.Items[i];
+        var value = Model.Values is { } values && values.Count == Model.Items.Count ? values[i] : null;
+        <li class="list-group-item">
+            <label class="form-check checklist-check mb-1">
+                <input type="checkbox" class="form-check-input" name="Checklist[@i].IsChecked" value="true" checked="@(value?.IsChecked ?? item.IsChecked)" />
+                <span class="form-check-label">@item.Text</span>
+            </label>
+            <input type="text" class="form-control form-control-sm" name="Checklist[@i].Note" value="@(value is null ? item.Note : value.Note)" maxlength="200" placeholder="備註（未勾選時必填原因）" aria-label="@item.Text 備註" />
+        </li>
+    }
+</ul>

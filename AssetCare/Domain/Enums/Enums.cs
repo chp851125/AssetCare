@@ -69,7 +69,8 @@ public enum WorkOrderAction
     [Display(Name = "留言")] Comment,
     [Display(Name = "外送維修")] SentToVendor,
     [Display(Name = "廠商送回")] ReturnedFromVendor,
-    [Display(Name = "領用零件")] PartIssued
+    [Display(Name = "領用零件")] PartIssued,
+    [Display(Name = "更新檢查清單")] ChecklistUpdated
 }
 
 public enum PartTransactionType
@@ -110,4 +111,12 @@ public enum WarrantyState
     [Display(Name = "保固中")] Active,
     [Display(Name = "保固即將到期")] Expiring,
     [Display(Name = "已過保固")] Expired
+}
+
+public enum MaintenanceDueState
+{
+    [Display(Name = "正常")] Normal,
+    [Display(Name = "即將到期")] DueSoon,
+    [Display(Name = "逾期")] Overdue,
+    [Display(Name = "停用")] Inactive
 }

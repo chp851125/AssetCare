@@ -31,8 +31,16 @@ public class ReminderService(
         foreach (var plan in plans.Query(p => p.IsActive && p.NextDueDate != null))
         {
             var due = plan.NextDueDate!.Value;
-            // 僅提醒尚未到期、且已進入提前產生期間的計畫。
-            if (due < today || due.DayNumber - today.DayNumber > plan.LeadDays) continue;
+            // 已逾期者提醒逾期；尚未到期者進入提前產生期間才提醒。
+            if (due < today)
+            {
+                SendOnce(managers.Append(plan.AssigneeUserId), NotificationType.MaintenanceDue,
+                    $"保養已逾期（{due:yyyy/MM/dd}）：{plan.Name}",
+                    $"{assets.GetById(plan.AssetId)?.Name} 原定 {due:yyyy/MM/dd} 保養，尚未完成。",
+                    $"/MaintenancePlans/Details/{plan.Id}");
+                continue;
+            }
+            if (due.DayNumber - today.DayNumber > plan.LeadDays) continue;
             SendOnce(managers.Append(plan.AssigneeUserId), NotificationType.MaintenanceDue,
                 $"保養即將到期（{due:yyyy/MM/dd}）：{plan.Name}",
                 $"{assets.GetById(plan.AssetId)?.Name} 預定 {due:yyyy/MM/dd} 保養。",

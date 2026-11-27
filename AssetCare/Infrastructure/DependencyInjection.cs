@@ -52,6 +52,12 @@ public static class DependencyInjection
         services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
         services.AddScoped<ISlaService, SlaService>();
         services.AddScoped<IReminderService, ReminderService>();
+        services.AddScoped<MaintenanceScheduler>();
+        services.AddScoped<IMaintenanceScheduler>(sp => sp.GetRequiredService<MaintenanceScheduler>());
+        services.AddScoped<IMaintenancePlanService, MaintenancePlanService>();
+        services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<ISettingService, SettingService>();
+        services.AddScoped<IAuditQueryService, AuditQueryService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ILocationService, LocationService>();
         return services;

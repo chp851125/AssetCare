@@ -1,11 +1,17 @@
-@model HomeSummary
-@{ ViewData["Title"] = "首頁"; }
+@using System.Text.Json
+@model HomeViewModel
+@{
+    ViewData["Title"] = "首頁";
+    var s = Model.Summary;
+    var a = Model.Analytics;
+    string Hours(double? value) => value is { } h ? $"{h:0.#} 小時" : "—";
+}
 <div class="mb-3">
     <h1 class="h4 mb-1">@User.FindFirst(AppClaimTypes.DisplayName)?.Value，您好</h1>
     <div class="text-secondary small">@Clock.Format(Clock.UtcNow, "yyyy/MM/dd（dddd） HH:mm")</div>
 </div>
 <div class="row g-3">
-    @foreach (var card in Model.Cards)
+    @foreach (var card in s.Cards)
     {
         <div class="col-6 col-md-4 col-xl">
             <div class="card stat-card h-100">
@@ -19,6 +25,167 @@
     }
 </div>
 
+<div class="row g-3 mt-0">
+    @foreach (var list in s.Lists)
+    {
+        <div class="col-12 col-lg-6">
+            <section class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5">@list.Title <span class="badge text-bg-light border">@list.Total</span></h2>
+                    @if (list.Items.Count == 0)
+                    {
+                        <p class="text-secondary mb-0">@list.EmptyText</p>
+                    }
+                    else
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var w in list.Items)
+                            {
+                                <a class="list-group-item list-group-item-action px-0" asp-controller="WorkOrders" asp-action="Details" asp-route-id="@w.Id">
+                                    <div class="d-flex justify-content-between gap-2">
+                                        <span class="small text-secondary">@w.OrderNo</span>
+                                        <span class="text-nowrap">
+                                            <span class="badge @w.Priority.BadgeClass()">@w.Priority.Label()</span>
+                                            <span class="badge @w.Status.BadgeClass()">@w.Status.Label()</span>
+                                        </span>
+                                    </div>
+                                    <div>@w.Title</div>
+                                    <div class="small @(w.Overdue ? "text-danger" : "text-secondary")">
+                                        @w.AssetName・期限 @Clock.Format(w.ResolveDueAt, "MM/dd HH:mm")@(w.Overdue ? "（逾時）" : "")
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                        @if (list.Total > list.Items.Count)
+                        {
+                            <a class="d-inline-block mt-2" asp-controller="WorkOrders" asp-action="Index">查看工單清單（共 @list.Total 筆）</a>
+                        }
+                    }
+                </div>
+            </section>
+        </div>
+    }
+    @if (s.OverduePlans.Count > 0)
+    {
+        <div class="col-12">
+            <section class="card border-danger">
+                <div class="card-body">
+                    <h2 class="h5 text-danger"><i class="bi bi-calendar-x"></i> 逾期保養提醒</h2>
+                    <div class="list-group list-group-flush">
+                        @foreach (var p in s.OverduePlans)
+                        {
+                            <a class="list-group-item list-group-item-action px-0" asp-controller="MaintenancePlans" asp-action="Details" asp-route-id="@p.Id">
+                                <div>@p.Name</div>
+                                <div class="small text-secondary">@p.AssetName・原定 @(p.NextDueDate?.ToString("yyyy/MM/dd") ?? "已達使用量")・負責人：@(p.AssigneeName ?? "未指派")</div>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </section>
+        </div>
+    }
+</div>
+
+@if (a is not null)
+{
+    var chartData = JsonSerializer.Serialize(new { a.Trend, a.Categories, a.Departments, a.Costs, a.Ranking },
+        new JsonSerializerOptions(JsonSerializerDefaults.Web));
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 mb-2">
+        <h2 class="h5 mb-0">統計分析</h2>
+        <div class="btn-group" role="group" aria-label="統計期間">
+            @foreach (var days in a.DayOptions)
+            {
+                <a class="btn btn-sm @(days == a.Days ? "btn-primary" : "btn-outline-primary")" asp-action="Index" asp-route-days="@days">近 @days 天</a>
+            }
+        </div>
+    </div>
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-3">
+            <div class="card h-100"><div class="card-body">
+                <div class="stat-value">@Hours(a.Kpi.AverageResponseHours)</div>
+                <div class="text-secondary">平均回應時間</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card h-100"><div class="card-body">
+                <div class="stat-value">@Hours(a.Kpi.AverageResolveHours)</div>
+                <div class="text-secondary">平均完工時間</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card h-100"><div class="card-body">
+                <div class="stat-value">@(a.Kpi.SlaRate is { } rate ? rate.ToString("P0") : "—")</div>
+                <div class="text-secondary">SLA 達成率（@a.Kpi.SlaMet／@a.Kpi.SlaTotal）</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card h-100"><div class="card-body">
+                <div class="stat-value">@a.Kpi.TotalCost.ToString("N0")</div>
+                <div class="text-secondary">維修成本（NT$）</div>
+            </div></div>
+        </div>
+    </div>
+    <p class="small text-secondary">期間內報修 @a.Kpi.RepairCount 件（不含取消）。SLA 只計已完工或已確定逾時的報修；成本含用料與外送費用。</p>
+
+    <div class="row g-3" id="dashboard" data-charts="@chartData">
+        <div class="col-12">
+            <div class="card"><div class="card-body">
+                <h3 class="h6">工單數量趨勢</h3>
+                <div class="chart" data-chart="trend" role="img" aria-label="工單數量趨勢折線圖"></div>
+            </div></div>
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="card h-100"><div class="card-body">
+                <h3 class="h6">故障類別分布</h3>
+                <div class="chart" data-chart="categories" role="img" aria-label="故障類別分布圓餅圖"></div>
+            </div></div>
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="card h-100"><div class="card-body">
+                <h3 class="h6">各部門報修量</h3>
+                <div class="chart" data-chart="departments" role="img" aria-label="各部門報修量長條圖"></div>
+            </div></div>
+        </div>
+        <div class="col-12">
+            <div class="card"><div class="card-body">
+                <h3 class="h6">維修成本統計（每月）</h3>
+                <div class="chart" data-chart="costs" role="img" aria-label="每月維修成本堆疊長條圖"></div>
+            </div></div>
+        </div>
+        <div class="col-12">
+            <div class="card"><div class="card-body">
+                <h3 class="h6">設備故障排行（MTBF）</h3>
+                @if (a.Ranking.Count == 0)
+                {
+                    <p class="text-secondary mb-0">期間內沒有報修紀錄。</p>
+                }
+                else
+                {
+                    <div class="chart" data-chart="ranking" role="img" aria-label="設備故障次數排行長條圖"></div>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr><th scope="col">資產</th><th scope="col" class="text-end">故障次數</th><th scope="col" class="text-end">MTBF（天）</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var r in a.Ranking)
+                                {
+                                    <tr>
+                                        <td><a asp-controller="Assets" asp-action="Details" asp-route-id="@r.AssetId">@r.AssetNo @r.AssetName</a></td>
+                                        <td class="text-end">@r.Count</td>
+                                        <td class="text-end">@(r.MtbfDays?.ToString("0.#") ?? "—")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="form-text">MTBF：期間內相鄰兩次故障通報的平均間隔天數，少於 2 次不計算。</div>
+                }
+            </div></div>
+        </div>
+    </div>
+}
+
 <h2 class="h6 text-secondary mt-4">常用功能</h2>
 <div class="list-group">
     <a class="list-group-item list-group-item-action py-3" asp-controller="WorkOrders" asp-action="Create"><i class="bi bi-tools me-2"></i>我要報修</a>
@@ -26,18 +193,26 @@
     <a class="list-group-item list-group-item-action py-3" asp-controller="Assets" asp-action="Index"><i class="bi bi-pc-display me-2"></i>資產清單</a>
     @if (User.IsStaff())
     {
+        <a class="list-group-item list-group-item-action py-3" asp-controller="MaintenancePlans" asp-action="Index"><i class="bi bi-calendar-check me-2"></i>預防保養</a>
+        <a class="list-group-item list-group-item-action py-3" asp-controller="MaintenancePlans" asp-action="Calendar"><i class="bi bi-calendar3 me-2"></i>保養行事曆</a>
         <a class="list-group-item list-group-item-action py-3" asp-controller="Parts" asp-action="Index"><i class="bi bi-box-seam me-2"></i>零件庫存</a>
     }
     @if (User.IsManager())
     {
         <a class="list-group-item list-group-item-action py-3" asp-controller="Vendors" asp-action="Index"><i class="bi bi-building me-2"></i>廠商</a>
-    }
-    @if (User.IsManager())
-    {
+        <a class="list-group-item list-group-item-action py-3" asp-controller="Reports" asp-action="Index"><i class="bi bi-file-earmark-spreadsheet me-2"></i>報表匯出</a>
         <a class="list-group-item list-group-item-action py-3" asp-controller="Assets" asp-action="Create"><i class="bi bi-plus-square me-2"></i>新增資產</a>
     }
     @if (User.IsInRole(Roles.Admin))
     {
-        <a class="list-group-item list-group-item-action py-3" asp-controller="Users" asp-action="Index"><i class="bi bi-people me-2"></i>使用者管理</a>
+        <a class="list-group-item list-group-item-action py-3" asp-controller="Admin" asp-action="Index"><i class="bi bi-gear me-2"></i>系統管理</a>
     }
 </div>
+
+@if (a is not null)
+{
+    @section Scripts {
+        <script src="~/lib/echarts/echarts.min.js"></script>
+        <script src="~/js/dashboard.js" asp-append-version="true"></script>
+    }
+}

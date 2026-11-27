@@ -38,7 +38,8 @@ public record ReportContext(ReportAsset Asset, IReadOnlyList<RelatedWorkOrder> R
 public record ReportInput(Guid AssetId, string? Description, Priority Priority);
 
 public record WorkOrderPermissions(bool Assign, bool Reassign, bool Accept, bool Start, bool Wait, bool Resume,
-    bool Complete, bool Verify, bool Cancel, bool IssuePart, bool SendOut, bool ReturnFromVendor, bool Upload);
+    bool Complete, bool Verify, bool Cancel, bool IssuePart, bool SendOut, bool ReturnFromVendor, bool Upload,
+    bool Checklist);
 
 public record WorkOrderLogItem(WorkOrderAction Action, WorkOrderStatus? FromStatus, WorkOrderStatus? ToStatus,
     string? Comment, string ActorName, DateTime OccurredAt);
@@ -63,13 +64,18 @@ public record WorkOrderDetail(Guid Id, int Version, string OrderNo, WorkOrderTyp
     IReadOnlyList<WorkOrderLogItem> Logs, IReadOnlyList<WorkOrderPartItem> Parts,
     IReadOnlyList<AttachmentItem> Photos, IReadOnlyList<RelatedWorkOrder> Recent, int DuplicateDays,
     WorkOrderPermissions Can, IReadOnlyList<Option> Technicians, IReadOnlyList<PartOption> PartOptions,
-    IReadOnlyList<Option> VendorOptions, DateOnly Today);
+    IReadOnlyList<Option> VendorOptions, DateOnly Today, Guid? MaintenancePlanId);
 
 public record CompleteContext(Guid Id, int Version, string OrderNo, string Title, string AssetName,
-    string? FaultCause, string? Resolution, decimal LaborHours, IReadOnlyList<PartOption> PartOptions);
+    string? FaultCause, string? Resolution, decimal LaborHours, IReadOnlyList<PartOption> PartOptions,
+    WorkOrderType Type, IReadOnlyList<ChecklistItem> Checklist);
 
 public record CompleteInput(string? FaultCause, string? Resolution, decimal LaborHours,
-    IReadOnlyList<PartLine> Parts, IReadOnlyList<UploadedFile> Photos);
+    IReadOnlyList<PartLine> Parts, IReadOnlyList<UploadedFile> Photos,
+    IReadOnlyList<ChecklistEntry>? Checklist = null);
+
+/// <summary>檢查清單單一項目的填寫內容，順序同工單清單。</summary>
+public record ChecklistEntry(bool IsChecked, string? Note);
 
 public record SendOutInput(Guid VendorId, DateOnly SentOutDate, DateOnly ExpectedReturnDate, string? Note);
 

@@ -34,6 +34,7 @@ public static class WorkOrderStateMachine
         [WorkOrderAction.Reassigned] =
             ([WorkOrderStatus.Assigned, WorkOrderStatus.InProgress, WorkOrderStatus.WaitingParts], null),
         [WorkOrderAction.PartIssued] = ([WorkOrderStatus.InProgress, WorkOrderStatus.WaitingParts], null),
+        [WorkOrderAction.ChecklistUpdated] = ([WorkOrderStatus.InProgress, WorkOrderStatus.WaitingParts], null),
         [WorkOrderAction.SentToVendor] =
             ([WorkOrderStatus.Assigned, WorkOrderStatus.InProgress, WorkOrderStatus.WaitingParts], null),
         [WorkOrderAction.ReturnedFromVendor] =

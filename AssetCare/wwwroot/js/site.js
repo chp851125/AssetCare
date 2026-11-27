@@ -112,3 +112,22 @@ document.querySelectorAll('select[data-life-target]').forEach(select => {
         if (life && !manual) target.value = life;
     });
 });
+
+// 保養計畫表單：依週期顯示日期或使用量欄位，並限制提前產生天數上限。
+document.querySelectorAll('select[data-cycle-select]').forEach(select => {
+    const form = select.form;
+    const lead = form.querySelector('[data-lead-days]');
+    const hint = form.querySelector('[data-lead-hint]');
+    const refresh = () => {
+        const byUsage = select.value === 'ByUsage';
+        form.querySelectorAll('[data-cycle-date]').forEach(field => field.classList.toggle('d-none', byUsage));
+        form.querySelectorAll('[data-cycle-usage]').forEach(field => field.classList.toggle('d-none', !byUsage));
+        const max = Number(select.selectedOptions[0]?.dataset.maxLead ?? 0);
+        if (hint) hint.textContent = `此週期最多 ${max} 天。`;
+        if (!lead) return;
+        lead.max = String(max);
+        if (Number(lead.value) > max) lead.value = String(max);
+    };
+    select.addEventListener('change', refresh);
+    refresh();
+});
