@@ -72,7 +72,10 @@ Razor 檢視位置已改為 `/Web/Views/{controller}/{view}.cshtml` 與 `/Web/Vi
 | 轉移紀錄、附件檢視與上傳、列印標籤 | | ✓ | ✓ | ✓ |
 | 刪除附件 | | 僅自己上傳的 | ✓ | ✓ |
 | 成本與折舊、資產新增／編輯／轉移／報廢、匯入匯出、類別與地點 | | | ✓ | ✓ |
-| 使用者管理 | | | | ✓ |
+| 使用者管理、系統參數、稽核紀錄 | | | | ✓ |
+| 保養計畫清單、詳情、行事曆 | | ✓ | ✓ | ✓ |
+| 保養計畫維護、手動產生、報表、全局統計 | | | ✓ | ✓ |
+| 登錄使用量 | | 僅自己負責 | ✓ | ✓ |
 
 ### 權限矩陣（工單、零件、通知）
 | 功能 | 申請人 | 技術員 | 主管 | 管理員 |
@@ -110,6 +113,41 @@ Razor 檢視位置已改為 `/Web/Views/{controller}/{view}.cshtml` 與 `/Web/Vi
 - 「近期重複報修」：同資產、未取消的報修工單，建立時間在 `workOrder.duplicateReportDays` 天內（剛好滿天數仍算）；只提示不阻擋。
 - 逾時顯示用 `WorkOrderRules.IsResponseOverdue／IsResolveOverdue`（已標示或即時判斷）；取消的工單只保留既有標示。
 
+## 預防保養
+- 查詢與維護用 `IMaintenancePlanService`；自動產生用 `IMaintenanceScheduler`（背景呼叫，不依賴登入身分）；完工與取消的計畫推進由 `MaintenanceScheduler.ApplyCompletion／SkipCycle`（`internal`，由 workflow service 在鎖內呼叫）。
+- 週期規則集中於 `MaintenanceRules`：週期鍵、可否產生、到期狀態（`MaintenanceDueState`）、下一期推算。
+- 產生條件：計畫啟用、資產未報廢、今天 ≥ 下次保養日 − `leadDays`（依使用量：累計使用量 ≥ 下次保養使用量）。
+- 不重複：同計畫同 `MaintenanceCycleKey` 只產生一次（**含已取消**）；同計畫有尚未完工（待派工、已指派、處理中、待料中）的工單時不產生下一張。
+- 提前產生天數須短於週期：每日 0、每週 ≤6、每月 ≤27、每季 ≤88、每年 ≤364；依使用量固定 0。
+- 負責人是啟用中技術員時，工單直接為已指派（寫建立與派工兩筆歷程），否則待派工。
+- 完工重算：下次保養日 = **完成日**（台北）+ 週期；依使用量 = max(本期門檻, 目前使用量) + 間隔。只有該計畫最新一張未取消的工單會推進計畫；遇到已用過的週期鍵再往後推。
+- 驗收退回不回復計畫；重做完工時重新計算。
+- 取消本期工單 = 略過本期：日期計畫由 max(下次保養日, 今天) 推到下一期。
+- 編輯計畫不可改資產；不可把週期改成已產生過工單的日期或使用量。
+- 逾期：日期計畫為下次保養日 < 今天（當天不算）；依使用量為達到門檻。即將到期：剩餘天數 ≤ max(`leadDays`, 7)，每日與每週只看 `leadDays`；依使用量為剩餘 ≤ 間隔一成。
+- 檢查清單於產生工單時複製；處理中、待料中可儲存（`WorkOrderAction.ChecklistUpdated`）；完工時每項須勾選或填備註。保養工單的完工欄位顯示為「保養狀況」「處理內容」。
+- 使用量只能增加；主管或該計畫負責技術員可登錄，登錄後立即檢查產生。
+- 權限：清單、詳情、行事曆限員工；新增、編輯、啟停用、手動產生限主管以上。
+
+## 儀表板與報表
+- 首頁依角色：申請人只有自己的報修；技術員為自己的待辦、今日保養（完工期限 ≤ 今天且未完工）、自己負責的逾期計畫；主管以上為全局與 `GetAnalytics`（30／90／180／365 天，預設 90）。範圍在 `DashboardService` 限制。
+- 故障統計只計未取消的報修工單（依建立日）；部門 = 申請人所屬部門；類別 = 資產類別。
+- 平均回應／完工時間 = 建立到 `RespondedAt`／`CompletedAt`。SLA 達成率樣本 = 已完工或已確定逾時的報修，達成 = 回應與完工都未逾時。
+- MTBF = 期間內同一資產相鄰兩次報修建立時間的平均天數，少於 2 次不計。
+- 維修成本 = 用料（依領用日）+ 外送費用（依 `WorkOrderRules.VendorCostDate`）；儀表板與報表定義一致，修改時兩處一起改。
+- 報表（主管以上）：`IReportService`，期間上限 3 年、預設近 90 天；資產清冊沿用資產匯出。每次匯出寫稽核。
+
+## 系統參數與稽核
+- 參數與稽核查詢限管理員。可修改的參數與範圍定義於 `SettingService.Definitions`；新增參數需同時加 `SettingKeys`、`catalog.json` 與此定義。
+- 參數整批檢查通過才寫入；各項帶版本；回應時限不可長於完工時限。SLA 修改只影響之後開立的工單。
+- 讀取可為 0 的參數用 `GetNonNegativeInt`，其餘用 `GetInt`。
+- 新增稽核動作時在 `AuditActions` 加常數與中文名稱。系統動作的操作者名稱為「系統」。
+
+## 安全
+- 安全標頭與登入頻率限制在 `Web/Infrastructure/SecurityExtensions.cs`（每 IP 每分鐘 20 次登入送出）。
+- 非 Development 環境的驗證與防偽 Cookie 只經 HTTPS 傳送。
+
+
 ## 零件
 - 庫存只能經由入庫、工單領用、盤點調整變更，每次寫一筆 `PartTransaction`。領用**一定要指定工單**（零件頁領用亦同）。
 - 扣庫存流程：鎖內先 `PartService.CheckAvailability`（同零件多列合併），再 `Consume`；鎖外 `NotifyLowStock`。
@@ -119,14 +157,14 @@ Razor 檢視位置已改為 `/Web/Views/{controller}/{view}.cshtml` 與 `/Web/Vi
 ## 通知與背景作業
 - 發通知一律用 `INotificationDispatcher.Send`（自動排除操作者本人與停用帳號，同時寫 .eml 與 `EmailLog`），在 `IBusinessLock` 之外呼叫。
 - `.eml` 寫入 `Email:OutboxDirectory`（預設 `outbox/`）；寄件人設定於 `appsettings.json` 的 `Email`。郵件內連結前綴為 `App:PublicBaseUrl`（空白時為相對路徑）。
-- `ScanBackgroundService`：啟動時及每 5 分鐘執行 `ISlaService.ScanOverdue` 與 `IReminderService.SendDueReminders`。背景呼叫的服務不可依賴登入身分。
+- `ScanBackgroundService`：啟動時及每 5 分鐘依序執行 `ISlaService.ScanOverdue`、`IMaintenanceScheduler.GenerateDueOrders`、`IReminderService.SendDueReminders`（含保養逾期提醒）。背景呼叫的服務不可依賴登入身分。
 - SLA 逾時各標示一次；已結案者只標示不通知。到期提醒以「類型＋連結＋含日期的標題」避免重複。
 - 掃描標示逾時會更新工單版本，開著舊畫面送出時會看到並行衝突提示。
 
 ## 掃碼
 - QR 入口 `/Assets/ByNo/{編號}` 導向 `/WorkOrders/Create?assetId=`（已報廢則轉資產詳情並說明）。
 - 系統內掃碼頁（`wwwroot/js/scan.js`）只取出資產編號，經 `/Scan/Asset?code=` 導向**資產詳情**（可報修、查歷史）；不直接開啟掃到的網址。
-- 相機需 HTTPS 或 localhost。手機測試：`dotnet run --project AssetCare --launch-profile lan-https`，手機開 `https://電腦IP:7171`（需信任開發憑證；完整說明於階段 4 寫入 README）。
+- 相機需 HTTPS 或 localhost。手機測試：`dotnet run --project AssetCare --launch-profile lan-https`，手機開 `https://電腦IP:7171`（需信任開發憑證；完整說明見 README「手機測試方式」）。
 
 
 ## 開發環境工具
@@ -151,10 +189,10 @@ Razor 檢視位置已改為 `/Web/Views/{controller}/{view}.cshtml` 與 `/Web/Vi
 - 驗收退回：`CompletedAt` 清空、`ReworkCount`+1，保留前次完工填寫內容。
 - 工單日誌：狀態變更記 `FromStatus`/`ToStatus`；留言、領料、外送等兩者皆 null。
 - `PartTransaction.Quantity` 帶正負號，`BalanceAfter` 為異動後庫存。
-- 單號：`WO-yyyyMMdd-0001`、`PM-yyyyMMdd-0001`（台北日期，`WorkOrderRules.NextOrderNo`；PM 由階段 4 使用）、`AST-類別代碼-0001`；以鎖內取現有最大序號 +1 配號。
+- 單號：`WO-yyyyMMdd-0001`、`PM-yyyyMMdd-0001`（台北日期，`WorkOrderRules.NextOrderNo`）、`AST-類別代碼-0001`；以鎖內取現有最大序號 +1 配號。
 - 資產編號建立後不變，因此類別不可改、使用中的類別代碼不可改。資產不提供刪除（用報廢）。
 - 資產地點、部門、保管人只能透過「轉移」變更（會留紀錄）。編輯只能在使用中／閒置間切換；維修中由工單控制。
-- 報廢需原因、無法復原；有未結案工單時拒絕；同時停用該資產的保養計畫。已報廢資產用 `AssetRules.EnsureNotScrapped` 擋下編輯、轉移、再報廢；開立工單已呼叫；**階段 4 建立保養計畫與產生工單也必須呼叫**。
+- 報廢需原因、無法復原；有未結案工單時拒絕；同時停用該資產的保養計畫。已報廢資產用 `AssetRules.EnsureNotScrapped` 擋下編輯、轉移、再報廢；開立工單、保養計畫新增／編輯／啟用、使用量登錄已呼叫；自動產生保養工單時略過已報廢資產。
 - 折舊用 `DepreciationCalculator`：直線法、按滿月、四捨五入到元，帳面價值介於殘值與成本之間；報廢資產計算到報廢日。
 - 保固狀態用 `WarrantyRules`：到期日當天仍在保固內，剩餘天數 ≤ `warranty.noticeDays` 為即將到期。
 - QR 標籤內容為 `{網址}/Assets/ByNo/{資產編號}`（用編號，重置資料後仍有效）。網址取 `App:PublicBaseUrl`，空白時用目前請求的主機。
@@ -162,7 +200,7 @@ Razor 檢視位置已改為 `/Web/Views/{controller}/{view}.cshtml` 與 `/Web/Vi
 - Excel 匯入全有或全無，上限 500 列；欄位定義於 `AssetExcelService.Columns`，匯出欄位為其超集。
 - 密碼原則 `PasswordRules`：最短長度讀設定、需含英文與數字、不可包含帳號、最長 100。
 - 使用者不提供刪除（用停用）。帳號建立後不可改。不可停用自己或改自己的角色，至少保留一位啟用中的管理員。技術員有未結案工單時不可改角色；停用不阻擋，僅提醒交接。
-- 保養工單可走一般工單流程；檢查清單目前唯讀。**階段 4 須補：逐項勾選、完工後重算計畫下次保養日**（掛在 `WorkOrderWorkflowService.Complete`），並實作 `MaintenancePlansController.Details`（目前為預留頁）。
+- 保養工單走一般工單流程（規則見「預防保養」）。
 - 站內連結格式：`/WorkOrders/Details/{id}`、`/Assets/Details/{id}`、`/Parts/Details/{id}`、`/MaintenancePlans/Details/{id}`（範例通知已使用，Controller 命名需一致）。
 
 ## 前端與版型
@@ -179,7 +217,9 @@ Razor 檢視位置已改為 `/Web/Views/{controller}/{view}.cshtml` 與 `/Web/Vi
 - A4 標籤樣式為 `site.css` 的 `.label-sheet`；`@page` 設定寫在 `Assets/Labels.cshtml`。
 - 危險操作表單加 `data-confirm="訊息"`（可加 `data-confirm-title`），由 `site.js` 顯示確認視窗。
 - 空狀態用 `.empty-state`；摘要卡片用 `.stat-card`。
-- 尚未開放的功能暫用 `ComingSoon` 檢視；實作時替換該 action。
+- 頁面**不可有行內腳本或 `onclick` 屬性**（CSP `script-src 'self'`）；行為寫在 `wwwroot/js`，資料用 `data-*` 屬性傳入（如儀表板的 `data-charts`，由 Razor 編碼）。
+- 圖表用 ECharts（`dashboard.js`，只用內建提示框，不寫回傳 HTML 的 formatter）；行事曆用 FullCalendar（`calendar.js`，窄螢幕用清單檢視）。
+- 檢查清單輸入用 `_ChecklistInput`（欄位名 `Checklist[i].IsChecked`／`Note`）。
 
 ## 記錄與健康檢查
 - Serilog：Console + `logs/assetcare-yyyyMMdd.log`（保留 30 天）。

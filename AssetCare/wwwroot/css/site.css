@@ -115,3 +115,24 @@ body { background: #f5f7f6; min-height: 100vh; }
     .label-sheets { overflow: visible; }
     .label-sheet { margin: 0; box-shadow: none; }
 }
+
+/* 儀表板 */
+.chart { width: 100%; height: 20rem; }
+.chart.chart-empty { height: auto; padding: 2rem 0; text-align: center; color: var(--bs-secondary-color); }
+
+/* 保養：行事曆事件、檢查清單 */
+.badge.event-order, .fc .fc-daygrid-event.event-order { background: #0d6efd; border: 1px solid #0d6efd; color: #fff; }
+.badge.event-planned, .fc .fc-daygrid-event.event-planned { background: #e9f2ec; border: 1px solid var(--app-primary); color: var(--app-primary); }
+.badge.event-overdue, .fc .fc-daygrid-event.event-overdue { background: #dc3545; border: 1px solid #dc3545; color: #fff; }
+.fc .fc-daygrid-event { overflow: hidden; }
+.fc .fc-daygrid-event .fc-event-title, .fc .fc-daygrid-event .fc-event-main { color: inherit; }
+.fc .fc-daygrid-event-dot { display: none; }
+.fc .fc-list-event.event-order .fc-list-event-dot { border-color: #0d6efd; }
+.fc .fc-list-event.event-planned .fc-list-event-dot { border-color: var(--app-primary); }
+.fc .fc-list-event.event-overdue .fc-list-event-dot { border-color: #dc3545; }
+.fc a { color: inherit; text-decoration: none; }
+.checklist-check { min-height: 2.75rem; display: flex; align-items: center; gap: .75rem; }
+.checklist-check .form-check-input { width: 1.4rem; height: 1.4rem; flex: none; margin-top: 0; }
+@media (max-width: 767.98px) {
+    .fc .fc-toolbar-title { font-size: 1.15rem; white-space: nowrap; }
+}

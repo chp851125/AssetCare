@@ -56,6 +56,9 @@ public class CompleteViewModel
 
     public List<PartLineViewModel> Parts { get; set; } = [];
 
+    /// <summary>保養工單的檢查清單；一般工單為空。</summary>
+    public List<ChecklistEntryViewModel> Checklist { get; set; } = [];
+
     [Display(Name = "完工照片")]
     public List<IFormFile> Photos { get; set; } = [];
 

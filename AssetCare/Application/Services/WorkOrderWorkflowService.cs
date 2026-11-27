@@ -16,6 +16,7 @@ public class WorkOrderWorkflowService(
     IRepository<AppSetting> settings,
     PartService partService,
     AttachmentService attachmentService,
+    MaintenanceScheduler maintenance,
     INotificationDispatcher notifications,
     IBusinessLock businessLock,
     ICurrentUser currentUser,
@@ -167,11 +168,17 @@ public class WorkOrderWorkflowService(
             target.FaultCause = cause;
             target.Resolution = resolution;
             target.LaborHours = Math.Round(input.LaborHours, 2);
+            if (target.Checklist.Count > 0)
+            {
+                if (input.Checklist is { } entries) ApplyChecklist(target, entries);
+                EnsureChecklistDone(target);
+            }
             // 版本衝突時在此中止，不會扣庫存。
             Transition(target, version, WorkOrderAction.Completed, resolution);
             var crossed = partService.Consume(target, lines);
             LogParts(target, lines);
             attachmentService.Save(AttachmentOwnerType.WorkOrder, target.Id, accepted, "完工照片");
+            maintenance.ApplyCompletion(target);
             return (target, crossed);
         });
 
@@ -225,6 +232,19 @@ public class WorkOrderWorkflowService(
             if (!WorkOrderAccess.CanView(target, currentUser))
                 throw new ForbiddenException("只能在自己的工單留言。");
             AddLog(target, WorkOrderAction.Comment, null, null, text);
+        });
+    }
+
+    public void UpdateChecklist(Guid id, int version, IReadOnlyList<ChecklistEntry> entries)
+    {
+        currentUser.RequireStaff();
+        businessLock.Run(() =>
+        {
+            var target = FindForProcessing(id, WorkOrderAction.ChecklistUpdated);
+            if (target.Checklist.Count == 0) throw new BusinessRuleException("此工單沒有檢查清單。");
+            ApplyChecklist(target, entries);
+            Transition(target, version, WorkOrderAction.ChecklistUpdated,
+                $"已完成 {target.Checklist.Count(c => c.IsChecked)}／{target.Checklist.Count} 項");
         });
     }
 
@@ -328,6 +348,7 @@ public class WorkOrderWorkflowService(
             change(target);
             Transition(target, version, action, comment);
             if (!WorkOrderStateMachine.IsActive(target.Status)) RestoreAsset(target);
+            if (target.Status == WorkOrderStatus.Cancelled) maintenance.SkipCycle(target);
             return target;
         });
     }
@@ -364,6 +385,25 @@ public class WorkOrderWorkflowService(
             .Any(w => WorkOrderStateMachine.IsActive(w.Status))) return;
         asset.Status = AssetStatus.InUse;
         assets.Update(asset);
+    }
+
+    /// <summary>依清單順序套用勾選與備註；筆數須與工單一致。</summary>
+    private static void ApplyChecklist(WorkOrder order, IReadOnlyList<ChecklistEntry> entries)
+    {
+        if (entries.Count != order.Checklist.Count)
+            throw new BusinessRuleException("檢查清單內容不一致，請重新整理頁面後再試。");
+        for (var i = 0; i < entries.Count; i++)
+        {
+            order.Checklist[i].IsChecked = entries[i].IsChecked;
+            order.Checklist[i].Note = InputText.Optional(entries[i].Note, "檢查備註", 200);
+        }
+    }
+
+    /// <summary>完工時每個項目都要勾選，無法完成者需填備註說明原因。</summary>
+    private static void EnsureChecklistDone(WorkOrder order)
+    {
+        if (order.Checklist.FirstOrDefault(c => !c.IsChecked && c.Note is null) is { } item)
+            throw new BusinessRuleException($"檢查項目「{item.Text}」尚未勾選；若無法完成，請在備註說明原因。");
     }
 
     private static void EnsureNotOutside(WorkOrder order, string action)

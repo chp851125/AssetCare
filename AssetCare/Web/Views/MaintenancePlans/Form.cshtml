@@ -1,0 +1,119 @@
+@model PlanFormViewModel
+@{
+    var isNew = Model.Id is null;
+    ViewData["Title"] = isNew ? "新增保養計畫" : "編輯保養計畫";
+}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <h1 class="h4 mb-3">@ViewData["Title"]</h1>
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="@(isNew ? "Create" : "Edit")" asp-route-id="@Model.Id" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+                    <input type="hidden" asp-for="Version" />
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="AssetId" class="form-label"></label>
+                            @if (isNew)
+                            {
+                                <select asp-for="AssetId" class="form-select" asp-items="Model.Options.Assets.ToSelectList()">
+                                    <option value="">請選擇資產</option>
+                                </select>
+                                <span asp-validation-for="AssetId" class="text-danger small"></span>
+                            }
+                            else
+                            {
+                                <input type="hidden" asp-for="AssetId" />
+                                <input type="text" class="form-control" id="AssetId_Label" value="@Model.AssetLabel" readonly />
+                            }
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" maxlength="100" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="Cycle" class="form-label"></label>
+                            <select asp-for="Cycle" class="form-select" data-cycle-select>
+                                @foreach (var c in Enum.GetValues<MaintenanceCycle>())
+                                {
+                                    <option value="@c" data-max-lead="@AssetCare.Domain.Rules.MaintenanceRules.MaxLeadDays(c)">@c.Label()</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="Priority" class="form-label"></label>
+                            <select asp-for="Priority" class="form-select">
+                                @foreach (var priority in Enum.GetValues<Priority>())
+                                {
+                                    <option value="@priority">@priority.Label()</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-6" data-cycle-date>
+                            <label asp-for="NextDueDate" class="form-label"></label>
+                            <input asp-for="NextDueDate" type="date" class="form-control" />
+                            <span asp-validation-for="NextDueDate" class="text-danger small"></span>
+                        </div>
+                        <div class="col-6" data-cycle-date>
+                            <label asp-for="LeadDays" class="form-label"></label>
+                            <input asp-for="LeadDays" type="number" min="0" class="form-control" data-lead-days />
+                            <span asp-validation-for="LeadDays" class="text-danger small"></span>
+                            <div class="form-text" data-lead-hint></div>
+                        </div>
+                        <div class="col-6" data-cycle-usage>
+                            <label asp-for="UsageInterval" class="form-label"></label>
+                            <input asp-for="UsageInterval" type="number" min="0" step="0.01" class="form-control" />
+                            <span asp-validation-for="UsageInterval" class="text-danger small"></span>
+                        </div>
+                        <div class="col-6" data-cycle-usage>
+                            <label asp-for="NextDueUsage" class="form-label"></label>
+                            <input asp-for="NextDueUsage" type="number" min="0" step="0.01" class="form-control" />
+                            <span asp-validation-for="NextDueUsage" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="AssigneeUserId" class="form-label"></label>
+                            <select asp-for="AssigneeUserId" class="form-select">
+                                <option value="">未指派（產生後由主管派工）</option>
+                                @foreach (var t in Model.Options.Technicians)
+                                {
+                                    <option value="@t.Id">@t.Text</option>
+                                }
+                                @if (Model.AssigneeUserId is { } current && Model.Options.Technicians.All(t => t.Id != current))
+                                {
+                                    <option value="@current" selected>（原負責人，已停用或非技術員）</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Checklist" class="form-label"></label>
+                            <textarea asp-for="Checklist" class="form-control" rows="6" placeholder="一行一個檢查項目"></textarea>
+                            <span asp-validation-for="Checklist" class="text-danger small"></span>
+                            <div class="form-text">一行一項，最多 30 項。修改只影響之後產生的工單。</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-check py-1">
+                                <input asp-for="IsActive" class="form-check-input" />
+                                <span class="form-check-label">啟用（自動產生工單）</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary">儲存</button>
+                        @if (isNew)
+                        {
+                            <a class="btn btn-link" asp-action="Index">取消</a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-link" asp-action="Details" asp-route-id="@Model.Id">取消</a>
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

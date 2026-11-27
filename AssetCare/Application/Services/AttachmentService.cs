@@ -34,6 +34,11 @@ public class AttachmentService(
             [".docx"] = ("application/vnd.openxmlformats-officedocument.wordprocessingml.document", [0x50, 0x4B, 0x03, 0x04])
         };
 
+    /// <summary>供系統參數驗證允許的副檔名。</summary>
+    internal static bool IsKnownExtension(string extension) => KnownTypes.ContainsKey(extension);
+
+    internal static string KnownExtensionList => string.Join("、", KnownTypes.Keys);
+
     public UploadRules GetUploadRules()
     {
         var configured = settings.GetValue(SettingKeys.UploadAllowedExtensions) ?? "";

@@ -123,8 +123,7 @@ public class AssetService(
             .OrderByDescending(p => p.IsActive).ThenBy(p => p.NextDueDate)
             .Select(p => new AssetPlanItem(p.Id, p.Name, p.Cycle, p.NextDueDate, p.NextDueUsage, p.LastCompletedDate,
                 UserName(p.AssigneeUserId), p.IsActive,
-                p.IsActive && (p.NextDueDate < today ||
-                               (p.Cycle == MaintenanceCycle.ByUsage && asset.CurrentUsage >= p.NextDueUsage))))
+                MaintenanceRules.DueStateOf(p, today, asset.CurrentUsage) == MaintenanceDueState.Overdue))
             .ToList();
 
         string Describe(Guid? location, Guid? department, Guid? custodian) => string.Join("｜",

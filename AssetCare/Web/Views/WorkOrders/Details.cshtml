@@ -4,6 +4,7 @@
     var can = o.Can;
     ViewData["Title"] = $"{o.OrderNo} {o.Title}";
     var isStaff = User.IsStaff();
+    var preventive = o.Type == WorkOrderType.Preventive;
     var active = o.Status is not (WorkOrderStatus.Closed or WorkOrderStatus.Cancelled);
     var hasPrimary = can.Accept || can.Start || can.Resume || can.Complete || can.Verify;
     string Date(DateOnly? value) => value?.ToString("yyyy/MM/dd") ?? "—";
@@ -42,15 +43,15 @@
     <div class="col-lg-8 order-2 order-lg-1">
         <section class="card mb-3">
             <div class="card-body">
-                <h2 class="h5">故障描述</h2>
+                <h2 class="h5">@(preventive ? "工單說明" : "故障描述")</h2>
                 <p class="pre-line mb-0">@o.Description</p>
                 @if (o.FaultCause is not null || o.Resolution is not null)
                 {
                     <hr />
                     <h2 class="h5">處理結果@(o.CompletedAt is null ? "（前次回報）" : "")</h2>
                     <dl class="row detail-list mb-0">
-                        <dt class="col-4 col-md-3">故障原因</dt><dd class="col-8 col-md-9 pre-line">@(o.FaultCause ?? "—")</dd>
-                        <dt class="col-4 col-md-3">處理方式</dt><dd class="col-8 col-md-9 pre-line">@(o.Resolution ?? "—")</dd>
+                        <dt class="col-4 col-md-3">@(preventive ? "保養狀況" : "故障原因")</dt><dd class="col-8 col-md-9 pre-line">@(o.FaultCause ?? "—")</dd>
+                        <dt class="col-4 col-md-3">@(preventive ? "處理內容" : "處理方式")</dt><dd class="col-8 col-md-9 pre-line">@(o.Resolution ?? "—")</dd>
                         <dt class="col-4 col-md-3">花費工時</dt><dd class="col-8 col-md-9">@o.LaborHours.ToString("0.##") 小時</dd>
                     </dl>
                 }
@@ -59,15 +60,26 @@
 
         @if (o.Checklist.Count > 0)
         {
-            <section class="card mb-3">
+            <section class="card mb-3" id="checklist">
                 <div class="card-body">
-                    <h2 class="h5">保養檢查清單</h2>
-                    <ul class="list-unstyled mb-0">
-                        @foreach (var item in o.Checklist)
-                        {
-                            <li><i class="bi @(item.IsChecked ? "bi-check-square text-success" : "bi-square")" aria-label="@(item.IsChecked ? "已完成" : "未完成")"></i> @item.Text @(item.Note is null ? "" : $"（{item.Note}）")</li>
-                        }
-                    </ul>
+                    <h2 class="h5">保養檢查清單 <span class="badge text-bg-light border">@o.Checklist.Count(c => c.IsChecked)／@o.Checklist.Count</span></h2>
+                    @if (can.Checklist)
+                    {
+                        <form asp-action="Checklist" asp-route-id="@o.Id" method="post">
+                            <input type="hidden" name="version" value="@o.Version" />
+                            <partial name="_ChecklistInput" model="new ChecklistInputViewModel(o.Checklist)" />
+                            <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-save"></i> 儲存檢查清單</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <ul class="list-unstyled mb-0">
+                            @foreach (var item in o.Checklist)
+                            {
+                                <li><i class="bi @(item.IsChecked ? "bi-check-square text-success" : "bi-square")" aria-label="@(item.IsChecked ? "已完成" : "未完成")"></i> @item.Text @(item.Note is null ? "" : $"（{item.Note}）")</li>
+                            }
+                        </ul>
+                    }
                 </div>
             </section>
         }
@@ -338,7 +350,7 @@
                             取消工單
                         </button>
                         <div class="collapse" id="cancelForm">
-                            <form asp-action="Cancel" asp-route-id="@o.Id" method="post" class="d-grid gap-2" data-confirm="取消後無法復原，確定要取消這張工單？">
+                            <form asp-action="Cancel" asp-route-id="@o.Id" method="post" class="d-grid gap-2" data-confirm="@(preventive ? "取消後無法復原，本期保養將略過並排定下一期。確定要取消？" : "取消後無法復原，確定要取消這張工單？")">
                                 <input type="hidden" name="version" value="@o.Version" />
                                 <input type="text" class="form-control" name="reason" maxlength="500" required placeholder="取消原因" aria-label="取消原因" />
                                 <button type="submit" class="btn btn-danger">確認取消</button>
@@ -369,6 +381,10 @@
                         @if (isStaff && o.RequesterPhone is not null) { <a class="d-block" href="tel:@o.RequesterPhone">@o.RequesterPhone</a> }
                     </dd>
                     <dt class="col-4">負責人</dt><dd class="col-8">@(o.AssigneeName ?? "未指派")</dd>
+                    @if (isStaff && o.MaintenancePlanId is { } planId)
+                    {
+                        <dt class="col-4">保養計畫</dt><dd class="col-8"><a asp-controller="MaintenancePlans" asp-action="Details" asp-route-id="@planId">檢視計畫</a></dd>
+                    }
                     <dt class="col-4">建立</dt><dd class="col-8">@Clock.Format(o.CreatedAt)</dd>
                     @if (o.ResponseDueAt is not null)
                     {

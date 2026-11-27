@@ -116,7 +116,8 @@ public class WorkOrderService(
             SendOut: assigned && CanProcess(order, WorkOrderAction.SentToVendor) && !outside,
             ReturnFromVendor: CanProcess(order, WorkOrderAction.ReturnedFromVendor) && outside,
             Upload: active && (currentUser.IsManager() || order.AssigneeUserId == userId ||
-                               order.RequesterUserId == userId));
+                               order.RequesterUserId == userId),
+            Checklist: order.Checklist.Count > 0 && CanProcess(order, WorkOrderAction.ChecklistUpdated));
 
         VendorRepairInfo? vendorInfo = null;
         if (full && order.VendorId is { } vendorId)
@@ -164,7 +165,7 @@ public class WorkOrderService(
             full ? order.FaultCause : null, full ? order.Resolution : null, order.LaborHours, order.ReworkCount,
             full ? order.Checklist : [], !full, vendorInfo, history, used, photos,
             RecentRepairs(asset.Id, order.Id, now, days, userNames), days, can, technicians, partOptions,
-            vendorOptions, time.Today);
+            vendorOptions, time.Today, order.MaintenancePlanId);
     }
 
     public IReadOnlyList<Option> GetReportableAssets()
@@ -194,7 +195,7 @@ public class WorkOrderService(
         WorkOrderWorkflowService.EnsureAllowed(order, WorkOrderAction.Completed);
         return new CompleteContext(order.Id, order.Version, order.OrderNo, order.Title,
             assets.GetById(order.AssetId)?.Name ?? "—", order.FaultCause, order.Resolution, order.LaborHours,
-            ActivePartOptions());
+            ActivePartOptions(), order.Type, order.Checklist);
     }
 
     private List<WorkOrderScope> AvailableScopes() => currentUser.Role switch

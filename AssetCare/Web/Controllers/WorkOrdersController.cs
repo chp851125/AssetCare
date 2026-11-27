@@ -128,7 +128,8 @@ public class WorkOrdersController(
         }
         if (ModelState.IsValid && this.TryExecute(() => workflow.Complete(id, form.Version,
                 new CompleteInput(form.FaultCause, form.Resolution, form.LaborHours!.Value, lines,
-                    Uploads(form.Photos)))))
+                    Uploads(form.Photos),
+                    form.Checklist.Count > 0 ? ChecklistEntryViewModel.ToEntries(form.Checklist) : null))))
         {
             return Back(id, "完工回報已送出，等待驗收。");
         }
@@ -161,6 +162,14 @@ public class WorkOrdersController(
     {
         workflow.AddComment(id, comment);
         return Back(id, "留言已送出。", "timeline");
+    }
+
+    [Authorize(Roles = Roles.Staff), HttpPost]
+    public IActionResult Checklist(Guid id, int version, List<ChecklistEntryViewModel> checklist)
+    {
+        if (!ModelState.IsValid) return Back(id, error: "檢查備註最多 200 個字。");
+        workflow.UpdateChecklist(id, version, ChecklistEntryViewModel.ToEntries(checklist));
+        return Back(id, "檢查清單已儲存。", "checklist");
     }
 
     [Authorize(Roles = Roles.Staff), HttpPost]

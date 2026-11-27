@@ -138,7 +138,13 @@
     <div class="col-12">
         <section class="card">
             <div class="card-body">
-                <h2 class="h5">保養計畫</h2>
+                <div class="d-flex justify-content-between gap-2">
+                    <h2 class="h5">保養計畫</h2>
+                    @if (User.IsManager() && !scrapped)
+                    {
+                        <a class="btn btn-sm btn-outline-primary align-self-start" asp-controller="MaintenancePlans" asp-action="Create" asp-route-assetId="@Model.Id"><i class="bi bi-plus-lg"></i> 新增</a>
+                    }
+                </div>
                 @if (Model.Plans.Count == 0)
                 {
                     <p class="text-secondary mb-0">尚未設定保養計畫。</p>
@@ -150,7 +156,7 @@
                         {
                             <li class="list-group-item px-0">
                                 <div class="d-flex justify-content-between gap-2">
-                                    <span>@p.Name</span>
+                                    @if (isStaff) { <a asp-controller="MaintenancePlans" asp-action="Details" asp-route-id="@p.Id">@p.Name</a> } else { <span>@p.Name</span> }
                                     <span class="text-nowrap">
                                         @if (!p.IsActive) { <span class="badge text-bg-secondary">停用</span> }
                                         @if (p.IsOverdue) { <span class="badge text-bg-danger">逾期</span> }

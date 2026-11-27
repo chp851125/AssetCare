@@ -1,0 +1,101 @@
+@using AssetCare.Application
+@model AuditIndexViewModel
+@{
+    ViewData["Title"] = "稽核紀錄";
+    var q = Model.Query;
+    var result = Model.Search.Result;
+    string Target(AuditItem i) => i.EntityName is null ? i.EntityType : $"{i.EntityType}｜{i.EntityName}";
+}
+<a class="d-inline-block mb-2" asp-controller="Admin" asp-action="Index"><i class="bi bi-chevron-left"></i> 系統管理</a>
+<h1 class="h4 mb-3">稽核紀錄</h1>
+
+<form method="get" asp-action="Index" class="card mb-3">
+    <div class="card-body row g-2">
+        <div class="col-6 col-lg-2">
+            <label class="form-label small mb-1" for="From">開始日期</label>
+            <input type="date" class="form-control" id="From" name="From" value="@q.From?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-6 col-lg-2">
+            <label class="form-label small mb-1" for="To">結束日期</label>
+            <input type="date" class="form-control" id="To" name="To" value="@q.To?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-6 col-lg-2">
+            <label class="form-label small mb-1" for="ActionCode">動作</label>
+            <select class="form-select" id="ActionCode" name="ActionCode">
+                <option value="">全部</option>
+                @foreach (var action in AuditActions.All)
+                {
+                    <option value="@action.Key" selected="@(q.ActionCode == action.Key)">@action.Value</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-2">
+            <label class="form-label small mb-1" for="EntityType">對象類型</label>
+            <select class="form-select" id="EntityType" name="EntityType">
+                <option value="">全部</option>
+                @foreach (var type in Model.Search.EntityTypes)
+                {
+                    <option value="@type" selected="@(q.EntityType == type)">@type</option>
+                }
+            </select>
+        </div>
+        <div class="col-12 col-lg-4">
+            <label class="form-label small mb-1" for="Keyword">關鍵字</label>
+            <input type="search" class="form-control" id="Keyword" name="Keyword" value="@q.Keyword" placeholder="帳號、姓名、對象、說明、IP" />
+        </div>
+        <div class="col-12 d-flex gap-2 justify-content-end">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> 查詢</button>
+            <button type="submit" class="btn btn-outline-success" formaction="@Url.Action("Export")"><i class="bi bi-download"></i> 匯出 Excel</button>
+        </div>
+    </div>
+</form>
+
+@if (result.Total == 0)
+{
+    <div class="empty-state"><i class="bi bi-journal-text"></i><p class="text-secondary">沒有符合條件的紀錄。</p></div>
+}
+else
+{
+    <div class="d-lg-none">
+        @foreach (var i in result.Items)
+        {
+            <div class="card mb-2">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between gap-2">
+                        <strong>@AuditActions.Label(i.ActionCode)</strong>
+                        <span class="small text-secondary">@Clock.Format(i.OccurredAt)</span>
+                    </div>
+                    <div class="small">@(i.DisplayName ?? i.UserName)（@i.UserName）・@i.IpAddress</div>
+                    <div class="small text-secondary text-break">@Target(i)</div>
+                    @if (i.Detail is not null) { <div class="small text-break">@i.Detail</div> }
+                </div>
+            </div>
+        }
+    </div>
+    <div class="card d-none d-lg-block">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">時間</th><th scope="col">使用者</th><th scope="col">IP</th>
+                        <th scope="col">動作</th><th scope="col">對象</th><th scope="col">說明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var i in result.Items)
+                    {
+                        <tr>
+                            <td class="text-nowrap">@Clock.Format(i.OccurredAt, "yyyy/MM/dd HH:mm:ss")</td>
+                            <td>@(i.DisplayName ?? i.UserName)<div class="small text-secondary">@i.UserName</div></td>
+                            <td class="text-nowrap">@i.IpAddress</td>
+                            <td class="text-nowrap">@AuditActions.Label(i.ActionCode)</td>
+                            <td class="text-break">@Target(i)</td>
+                            <td class="text-break">@(i.Detail ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+<partial name="_Pager" model="PagerViewModel.From(result)" />

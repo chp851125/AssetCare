@@ -1,0 +1,40 @@
+@using AssetCare.Application
+@model ReportsViewModel
+@{
+    ViewData["Title"] = "報表匯出";
+}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <h1 class="h4 mb-3">報表匯出</h1>
+        <form asp-action="Export" method="get" class="card">
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label" for="type">報表類型</label>
+                    <select class="form-select" id="type" name="type">
+                        @foreach (var type in Enum.GetValues<ReportType>())
+                        {
+                            <option value="@type">@type.Label()</option>
+                        }
+                    </select>
+                </div>
+                <div class="row g-3 mb-2">
+                    <div class="col-6">
+                        <label class="form-label" for="from">開始日期</label>
+                        <input type="date" class="form-control" id="from" name="from" value="@Model.Range.From.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="to">結束日期</label>
+                        <input type="date" class="form-control" id="to" name="to" value="@Model.Range.To.ToString("yyyy-MM-dd")" required />
+                    </div>
+                </div>
+                <ul class="form-text">
+                    <li>工單明細、保養紀錄：依建立日期。</li>
+                    <li>零件異動：依異動時間。</li>
+                    <li>維修成本：用料依領用日、外送費用依回廠日。</li>
+                    <li>資產清冊：目前資料，不受期間限制。</li>
+                </ul>
+                <button type="submit" class="btn btn-primary btn-lg w-100"><i class="bi bi-download"></i> 匯出 Excel</button>
+            </div>
+        </form>
+    </div>
+</div>

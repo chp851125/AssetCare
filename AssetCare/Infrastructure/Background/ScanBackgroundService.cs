@@ -2,7 +2,7 @@ using AssetCare.Application.Interfaces;
 
 namespace AssetCare.Infrastructure.Background;
 
-/// <summary>啟動時執行一次，之後每 5 分鐘掃描 SLA 逾時與到期提醒。</summary>
+/// <summary>啟動時執行一次，之後每 5 分鐘掃描 SLA 逾時、產生保養工單與發送到期提醒。</summary>
 public class ScanBackgroundService(IServiceScopeFactory scopes, ILogger<ScanBackgroundService> logger)
     : BackgroundService
 {
@@ -21,6 +21,11 @@ public class ScanBackgroundService(IServiceScopeFactory scopes, ILogger<ScanBack
                 {
                     var count = services.GetRequiredService<ISlaService>().ScanOverdue();
                     if (count > 0) logger.LogInformation("新增 {Count} 張逾時工單", count);
+                });
+                Run("保養工單產生", services =>
+                {
+                    var count = services.GetRequiredService<IMaintenanceScheduler>().GenerateDueOrders();
+                    if (count > 0) logger.LogInformation("產生 {Count} 張保養工單", count);
                 });
                 Run("到期提醒", services => services.GetRequiredService<IReminderService>().SendDueReminders());
             } while (await timer.WaitForNextTickAsync(stoppingToken));

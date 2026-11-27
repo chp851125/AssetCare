@@ -4,6 +4,7 @@ using AssetCare.Web.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace AssetCare.Web.Controllers;
 
@@ -15,7 +16,7 @@ public class AccountController(IAuthService auth) : Controller
             ? RedirectToLocal(returnUrl)
             : View(new LoginViewModel { ReturnUrl = returnUrl });
 
-    [AllowAnonymous, HttpPost]
+    [AllowAnonymous, HttpPost, EnableRateLimiting(SecurityExtensions.LoginRateLimit)]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
         if (!ModelState.IsValid) return View(model);

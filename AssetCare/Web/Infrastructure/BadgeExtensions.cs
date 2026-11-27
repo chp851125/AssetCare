@@ -21,6 +21,14 @@ public static class BadgeExtensions
         _ => "text-bg-light border"
     };
 
+    public static string BadgeClass(this MaintenanceDueState state) => state switch
+    {
+        MaintenanceDueState.Overdue => "text-bg-danger",
+        MaintenanceDueState.DueSoon => "text-bg-warning",
+        MaintenanceDueState.Normal => "text-bg-success",
+        _ => "text-bg-secondary"
+    };
+
     public static string BadgeClass(this Priority priority) => priority switch
     {
         Priority.Urgent => "text-bg-danger",

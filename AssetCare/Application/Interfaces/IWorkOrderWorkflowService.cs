@@ -18,6 +18,8 @@ public interface IWorkOrderWorkflowService
     void Reject(Guid id, int version, string? reason);
     void Cancel(Guid id, int version, string? reason);
     void AddComment(Guid id, string? comment);
+    /// <summary>保養工單檢查清單勾選（處理中或待料中）。</summary>
+    void UpdateChecklist(Guid id, int version, IReadOnlyList<ChecklistEntry> entries);
     void IssuePart(Guid id, int version, PartLine line);
     void SendToVendor(Guid id, int version, SendOutInput input);
     void ReturnFromVendor(Guid id, int version, VendorReturnInput input);
