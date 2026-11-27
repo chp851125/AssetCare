@@ -1,0 +1,40 @@
+@{ ViewData["Title"] = "掃碼"; }
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-5">
+        <h1 class="h4 mb-3">掃描設備 QR Code</h1>
+
+        <div class="alert alert-warning d-none" id="scanMessage" role="alert"></div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <div id="reader" class="scan-reader"></div>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-primary btn-lg" id="startScan"><i class="bi bi-camera"></i> 開啟相機掃描</button>
+                    <button type="button" class="btn btn-outline-secondary btn-lg d-none" id="stopScan">停止掃描</button>
+                    <label class="btn btn-outline-primary btn-lg mb-0">
+                        <i class="bi bi-image"></i> 拍照或選擇照片辨識
+                        <input type="file" accept="image/*" id="scanFile" class="visually-hidden" />
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="get" asp-action="Asset" id="manualForm">
+                    <label class="form-label" for="code">手動輸入資產編號</label>
+                    <div class="input-group input-group-lg">
+                        <input type="text" class="form-control" id="code" name="code" placeholder="AST-類別代碼-0001" autocapitalize="characters" autocomplete="off" spellcheck="false" required />
+                        <button type="submit" class="btn btn-primary">查詢</button>
+                    </div>
+                    <div class="form-text">編號印在 QR Code 標籤上。</div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="fileReader" class="d-none"></div>
+@section Scripts {
+    <script src="~/lib/html5-qrcode/html5-qrcode.min.js"></script>
+    <script src="~/js/scan.js" asp-append-version="true"></script>
+}

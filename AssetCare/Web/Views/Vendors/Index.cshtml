@@ -1,0 +1,59 @@
+@model VendorIndexViewModel
+@{
+    ViewData["Title"] = "廠商";
+    var q = Model.Query;
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 mb-0">廠商</h1>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> 新增廠商</a>
+</div>
+
+<form method="get" asp-action="Index" class="card mb-3">
+    <div class="card-body">
+        <div class="input-group">
+            <input type="search" class="form-control" name="Keyword" value="@q.Keyword" placeholder="名稱、統編、聯絡人、電話、服務範圍" aria-label="關鍵字" />
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> 搜尋</button>
+        </div>
+        <label class="form-check py-2 mb-0">
+            <input type="checkbox" class="form-check-input" name="IncludeInactive" value="true" checked="@q.IncludeInactive" />
+            <span class="form-check-label">包含停用</span>
+        </label>
+    </div>
+</form>
+
+@if (Model.Result.Total == 0)
+{
+    <div class="empty-state">
+        <i class="bi bi-building"></i>
+        <p class="text-secondary">沒有符合條件的廠商。</p>
+    </div>
+}
+else
+{
+    <div class="row g-2">
+        @foreach (var v in Model.Result.Items)
+        {
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between gap-2">
+                            <h2 class="h6 mb-1">@v.Name</h2>
+                            <span>
+                                @if (v.OutsourcedCount > 0) { <span class="badge text-bg-warning">外送中 @v.OutsourcedCount</span> }
+                                @if (!v.IsActive) { <span class="badge text-bg-secondary">停用</span> }
+                            </span>
+                        </div>
+                        <div class="small text-secondary">@(v.ServiceScope ?? "—")</div>
+                        <div class="small">聯絡人：@(v.ContactName ?? "—")・統編：@(v.TaxId ?? "—")</div>
+                        <div class="d-flex flex-wrap gap-3 align-items-center">
+                            @if (v.Phone is not null) { <a class="py-2" href="tel:@v.Phone"><i class="bi bi-telephone"></i> @v.Phone</a> }
+                            @if (v.Email is not null) { <a class="py-2 text-break" href="mailto:@v.Email"><i class="bi bi-envelope"></i> @v.Email</a> }
+                            <a class="btn btn-outline-primary ms-auto" asp-action="Edit" asp-route-id="@v.Id"><i class="bi bi-pencil"></i> 編輯</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+<partial name="_Pager" model="PagerViewModel.From(Model.Result)" />

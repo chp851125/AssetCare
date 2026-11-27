@@ -1,0 +1,386 @@
+@model WorkOrderDetailViewModel
+@{
+    var o = Model.Order;
+    var can = o.Can;
+    ViewData["Title"] = $"{o.OrderNo} {o.Title}";
+    var isStaff = User.IsStaff();
+    var active = o.Status is not (WorkOrderStatus.Closed or WorkOrderStatus.Cancelled);
+    var hasPrimary = can.Accept || can.Start || can.Resume || can.Complete || can.Verify;
+    string Date(DateOnly? value) => value?.ToString("yyyy/MM/dd") ?? "—";
+}
+
+<a class="d-inline-block mb-2" asp-action="Index"><i class="bi bi-chevron-left"></i> 工單清單</a>
+<div class="mb-3">
+    <div class="text-secondary">@o.OrderNo・@o.Type.Label()</div>
+    <h1 class="h4 mb-1">@o.Title</h1>
+    <span class="badge @o.Status.BadgeClass()">@o.Status.Label()</span>
+    <span class="badge @o.Priority.BadgeClass()">優先級：@o.Priority.Label()</span>
+    @if (o.ResponseOverdue) { <span class="badge text-bg-danger">回應逾時</span> }
+    @if (o.ResolveOverdue) { <span class="badge text-bg-danger">完工逾時</span> }
+    @if (o.ReworkCount > 0) { <span class="badge text-bg-dark">退回 @o.ReworkCount 次</span> }
+</div>
+
+@if (o.IsLimited)
+{
+    <div class="alert alert-info">這是他人通報的近期報修，僅顯示摘要供您確認是否為同一問題。</div>
+}
+@if (o.Status == WorkOrderStatus.Cancelled)
+{
+    <div class="alert alert-secondary">本工單已於 @Clock.Format(o.CancelledAt) 取消。原因：@o.CancelReason</div>
+}
+@if (o.Recent.Count > 0 && active)
+{
+    <div class="alert alert-warning">
+        <button type="button" class="btn btn-link alert-link p-0 text-start" data-bs-toggle="collapse" data-bs-target="#recentOrders" aria-expanded="false" aria-controls="recentOrders">
+            <i class="bi bi-exclamation-triangle"></i> 此設備 @o.DuplicateDays 天內另有 @o.Recent.Count 筆報修，點此查看
+        </button>
+        <div class="collapse mt-2" id="recentOrders"><partial name="_RelatedOrders" model="o.Recent" /></div>
+    </div>
+}
+
+<div class="row g-3">
+    <div class="col-lg-8 order-2 order-lg-1">
+        <section class="card mb-3">
+            <div class="card-body">
+                <h2 class="h5">故障描述</h2>
+                <p class="pre-line mb-0">@o.Description</p>
+                @if (o.FaultCause is not null || o.Resolution is not null)
+                {
+                    <hr />
+                    <h2 class="h5">處理結果@(o.CompletedAt is null ? "（前次回報）" : "")</h2>
+                    <dl class="row detail-list mb-0">
+                        <dt class="col-4 col-md-3">故障原因</dt><dd class="col-8 col-md-9 pre-line">@(o.FaultCause ?? "—")</dd>
+                        <dt class="col-4 col-md-3">處理方式</dt><dd class="col-8 col-md-9 pre-line">@(o.Resolution ?? "—")</dd>
+                        <dt class="col-4 col-md-3">花費工時</dt><dd class="col-8 col-md-9">@o.LaborHours.ToString("0.##") 小時</dd>
+                    </dl>
+                }
+            </div>
+        </section>
+
+        @if (o.Checklist.Count > 0)
+        {
+            <section class="card mb-3">
+                <div class="card-body">
+                    <h2 class="h5">保養檢查清單</h2>
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var item in o.Checklist)
+                        {
+                            <li><i class="bi @(item.IsChecked ? "bi-check-square text-success" : "bi-square")" aria-label="@(item.IsChecked ? "已完成" : "未完成")"></i> @item.Text @(item.Note is null ? "" : $"（{item.Note}）")</li>
+                        }
+                    </ul>
+                </div>
+            </section>
+        }
+
+        @if (!o.IsLimited)
+        {
+            <section class="card mb-3" id="photos">
+                <div class="card-body">
+                    <h2 class="h5">照片</h2>
+                    @if (o.Photos.Count == 0)
+                    {
+                        <p class="text-secondary">尚無照片。</p>
+                    }
+                    <div class="row g-2 mb-2">
+                        @foreach (var file in o.Photos)
+                        {
+                            <div class="col-6 col-md-4">
+                                <div class="card h-100">
+                                    <a asp-controller="Attachments" asp-action="Download" asp-route-id="@file.Id" target="_blank" rel="noopener">
+                                        <img class="card-img-top attachment-thumb" alt="@(file.Caption ?? file.FileName)" loading="lazy"
+                                             src="@Url.Action("Download", "Attachments", new { id = file.Id })" />
+                                    </a>
+                                    <div class="card-body p-2 small">
+                                        @if (file.Caption is not null) { <div>@file.Caption</div> }
+                                        <div class="text-secondary">@file.UploadedByName・@Clock.Format(file.UploadedAt, "MM/dd HH:mm")</div>
+                                        @if (file.CanDelete)
+                                        {
+                                            <form asp-controller="Attachments" asp-action="Delete" asp-route-id="@file.Id" method="post" data-confirm="確定要刪除照片「@file.FileName」？">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger mt-1"><i class="bi bi-trash"></i> 刪除</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    @if (can.Upload)
+                    {
+                        <form asp-action="UploadPhotos" asp-route-id="@o.Id" method="post" enctype="multipart/form-data">
+                            <partial name="_PhotoInput" model='new PhotoInputViewModel("photos", Model.Rules)' />
+                            <button type="submit" class="btn btn-outline-primary btn-lg w-100 mt-2"><i class="bi bi-upload"></i> 上傳照片</button>
+                        </form>
+                    }
+                </div>
+            </section>
+
+            <section class="card mb-3" id="parts">
+                <div class="card-body">
+                    <h2 class="h5">使用零件</h2>
+                    @if (o.Parts.Count == 0)
+                    {
+                        <p class="text-secondary mb-0">尚未領用零件。</p>
+                    }
+                    else
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var p in o.Parts)
+                            {
+                                <li class="list-group-item px-0 d-flex justify-content-between gap-2">
+                                    <div>
+                                        @if (isStaff) { <a asp-controller="Parts" asp-action="Details" asp-route-id="@p.PartId">@p.Name</a> } else { <span>@p.Name</span> }
+                                        <div class="small text-secondary">@p.IssuedByName・@Clock.Format(p.IssuedAt, "MM/dd HH:mm")</div>
+                                    </div>
+                                    <div class="text-end text-nowrap">
+                                        @p.Quantity @p.Unit
+                                        @if (isStaff) { <div class="small text-secondary">NT$ @((p.Quantity * p.UnitCost).ToString("N0"))</div> }
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    @if (can.IssuePart)
+                    {
+                        <form asp-action="IssuePart" asp-route-id="@o.Id" method="post" class="row g-2 mt-1">
+                            <input type="hidden" name="version" value="@o.Version" />
+                            <div class="col-12 col-sm-7">
+                                <select class="form-select" name="partId" required aria-label="零件">
+                                    <option value="">選擇要領用的零件</option>
+                                    @foreach (var part in o.PartOptions)
+                                    {
+                                        <option value="@part.Id" disabled="@(part.Stock == 0)">@part.Text</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-5 col-sm-2"><input type="number" class="form-control" name="quantity" min="1" step="1" value="1" required inputmode="numeric" aria-label="數量" /></div>
+                            <div class="col-7 col-sm-3 d-grid"><button type="submit" class="btn btn-outline-primary">領用</button></div>
+                        </form>
+                    }
+                </div>
+            </section>
+
+            @if (o.Vendor is not null || can.SendOut)
+            {
+                <section class="card mb-3" id="vendor">
+                    <div class="card-body">
+                        <h2 class="h5">外送維修</h2>
+                        @if (o.Vendor is { } v)
+                        {
+                            <dl class="row detail-list mb-0">
+                                <dt class="col-4 col-md-3">廠商</dt>
+                                <dd class="col-8 col-md-9">@v.VendorName @if (v.VendorPhone is not null) { <a class="d-block" href="tel:@v.VendorPhone">@v.VendorPhone</a> }</dd>
+                                <dt class="col-4 col-md-3">外送日期</dt><dd class="col-8 col-md-9">@Date(v.SentOutDate)</dd>
+                                <dt class="col-4 col-md-3">預計回廠</dt>
+                                <dd class="col-8 col-md-9">
+                                    @Date(v.ExpectedReturnDate)
+                                    @if (active && v.ReturnedDate is null && v.ExpectedReturnDate < o.Today) { <span class="badge text-bg-danger">已超過預計日</span> }
+                                </dd>
+                                <dt class="col-4 col-md-3">實際回廠</dt><dd class="col-8 col-md-9">@(v.ReturnedDate is null ? "尚未送回" : Date(v.ReturnedDate))</dd>
+                                @if (v.Cost is { } cost) { <dt class="col-4 col-md-3">維修費用</dt><dd class="col-8 col-md-9">NT$ @cost.ToString("N0")</dd> }
+                            </dl>
+                        }
+                        @if (can.ReturnFromVendor)
+                        {
+                            <hr />
+                            <form asp-action="ReturnFromVendor" asp-route-id="@o.Id" method="post" class="row g-2">
+                                <input type="hidden" name="version" value="@o.Version" />
+                                <div class="col-6">
+                                    <label class="form-label small mb-1" for="returnedDate">回廠日期</label>
+                                    <input type="date" class="form-control" id="returnedDate" name="returnedDate" value="@o.Today.ToString("yyyy-MM-dd")" max="@o.Today.ToString("yyyy-MM-dd")" required />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small mb-1" for="cost">本次費用</label>
+                                    <input type="number" class="form-control" id="cost" name="cost" min="0" step="1" value="0" required inputmode="numeric" />
+                                </div>
+                                <div class="col-12"><input type="text" class="form-control" name="note" maxlength="500" placeholder="說明（選填）" aria-label="送回說明" /></div>
+                                <div class="col-12 d-grid"><button type="submit" class="btn btn-primary">登錄廠商送回</button></div>
+                            </form>
+                        }
+                        @if (can.SendOut)
+                        {
+                            <button type="button" class="btn btn-outline-secondary mt-2" data-bs-toggle="collapse" data-bs-target="#sendOut" aria-expanded="false" aria-controls="sendOut">
+                                <i class="bi bi-truck"></i> 登錄外送維修
+                            </button>
+                            <div class="collapse" id="sendOut">
+                                <form asp-action="SendToVendor" asp-route-id="@o.Id" method="post" class="row g-2 mt-1">
+                                    <input type="hidden" name="version" value="@o.Version" />
+                                    <div class="col-12">
+                                        <select class="form-select" name="vendorId" asp-items="o.VendorOptions.ToSelectList()" required aria-label="廠商">
+                                            <option value="">選擇廠商</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small mb-1" for="sentOutDate">外送日期</label>
+                                        <input type="date" class="form-control" id="sentOutDate" name="sentOutDate" value="@o.Today.ToString("yyyy-MM-dd")" max="@o.Today.ToString("yyyy-MM-dd")" required />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small mb-1" for="expectedReturnDate">預計回廠日</label>
+                                        <input type="date" class="form-control" id="expectedReturnDate" name="expectedReturnDate" required />
+                                    </div>
+                                    <div class="col-12"><input type="text" class="form-control" name="note" maxlength="500" placeholder="說明（選填）" aria-label="外送說明" /></div>
+                                    <div class="col-12 d-grid"><button type="submit" class="btn btn-primary">確認外送</button></div>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+
+            <section class="card" id="timeline">
+                <div class="card-body">
+                    <h2 class="h5">處理歷程與留言</h2>
+                    <form asp-action="Comment" asp-route-id="@o.Id" method="post" class="mb-3">
+                        <textarea class="form-control mb-2" name="comment" rows="2" maxlength="1000" required placeholder="輸入留言" aria-label="留言內容"></textarea>
+                        <div class="text-end"><button type="submit" class="btn btn-outline-primary"><i class="bi bi-chat-dots"></i> 送出留言</button></div>
+                    </form>
+                    <ol class="timeline">
+                        @foreach (var log in o.Logs)
+                        {
+                            <li class="@(log.Action == WorkOrderAction.Comment ? "is-comment" : "")">
+                                <div class="small text-secondary">@Clock.Format(log.OccurredAt)・@log.ActorName</div>
+                                <div class="fw-semibold">
+                                    @log.Action.Label()
+                                    @if (log.ToStatus is { } to) { <span class="badge @to.BadgeClass()">@to.Label()</span> }
+                                </div>
+                                @if (log.Comment is not null) { <div class="pre-line">@log.Comment</div> }
+                            </li>
+                        }
+                    </ol>
+                </div>
+            </section>
+        }
+    </div>
+
+    <div class="col-lg-4 order-1 order-lg-2">
+        @if (hasPrimary || can.Assign || can.Reassign || can.Wait || can.Cancel)
+        {
+            <section class="card mb-3">
+                <div class="card-body d-grid gap-2">
+                    <h2 class="h5 mb-0">處理</h2>
+                    @if (hasPrimary)
+                    {
+                        <!-- 手機固定於底部導覽上方，單手即可操作；桌機排在卡片內。 -->
+                        <div class="action-bar">
+                            @if (can.Accept)
+                            {
+                                <form asp-action="Accept" asp-route-id="@o.Id" method="post">
+                                    <input type="hidden" name="version" value="@o.Version" />
+                                    <button type="submit" class="btn btn-primary btn-lg w-100"><i class="bi bi-hand-index"></i> 接單</button>
+                                </form>
+                            }
+                            @if (can.Start)
+                            {
+                                <form asp-action="Start" asp-route-id="@o.Id" method="post">
+                                    <input type="hidden" name="version" value="@o.Version" />
+                                    <button type="submit" class="btn btn-primary btn-lg w-100"><i class="bi bi-play-fill"></i> 開始處理</button>
+                                </form>
+                            }
+                            @if (can.Resume)
+                            {
+                                <form asp-action="Resume" asp-route-id="@o.Id" method="post">
+                                    <input type="hidden" name="version" value="@o.Version" />
+                                    <button type="submit" class="btn btn-primary btn-lg w-100"><i class="bi bi-play-fill"></i> 恢復處理</button>
+                                </form>
+                            }
+                            @if (can.Complete)
+                            {
+                                <a class="btn btn-success btn-lg w-100" asp-action="Complete" asp-route-id="@o.Id"><i class="bi bi-check2-circle"></i> 完工回報</a>
+                            }
+                            @if (can.Verify)
+                            {
+                                <form asp-action="Verify" asp-route-id="@o.Id" method="post" data-confirm="確認問題已解決並結案？" data-confirm-title="驗收通過">
+                                    <input type="hidden" name="version" value="@o.Version" />
+                                    <button type="submit" class="btn btn-success btn-lg w-100"><i class="bi bi-hand-thumbs-up"></i> 驗收通過</button>
+                                </form>
+                                <button type="button" class="btn btn-outline-danger btn-lg w-100" data-bs-toggle="collapse" data-bs-target="#rejectForm" data-scroll-to="#rejectForm" aria-expanded="false" aria-controls="rejectForm">
+                                    退回
+                                </button>
+                            }
+                        </div>
+                    }
+                    @if (can.Verify)
+                    {
+                        <div class="collapse" id="rejectForm">
+                            <form asp-action="Reject" asp-route-id="@o.Id" method="post" class="d-grid gap-2">
+                                <input type="hidden" name="version" value="@o.Version" />
+                                <textarea class="form-control" name="reason" rows="2" maxlength="500" required placeholder="哪裡還有問題？" aria-label="退回原因"></textarea>
+                                <button type="submit" class="btn btn-danger">確認退回重做</button>
+                            </form>
+                        </div>
+                    }
+                    @if (can.Assign || can.Reassign)
+                    {
+                        <form asp-action="Assign" asp-route-id="@o.Id" method="post" class="d-grid gap-2">
+                            <input type="hidden" name="version" value="@o.Version" />
+                            <select class="form-select" name="technicianId" asp-items="o.Technicians.ToSelectList()" required aria-label="技術員">
+                                <option value="">@(can.Assign ? "選擇技術員" : "改派給…")</option>
+                            </select>
+                            <input type="text" class="form-control" name="note" maxlength="500" placeholder="派工說明（選填）" aria-label="派工說明" />
+                            <button type="submit" class="btn @(can.Assign ? "btn-primary" : "btn-outline-primary")"><i class="bi bi-person-check"></i> @(can.Assign ? "派工" : "改派")</button>
+                        </form>
+                    }
+                    @if (can.Wait)
+                    {
+                        <button type="button" class="btn btn-outline-warning text-dark" data-bs-toggle="collapse" data-bs-target="#waitForm" aria-expanded="false" aria-controls="waitForm">
+                            <i class="bi bi-hourglass-split"></i> 待料
+                        </button>
+                        <div class="collapse" id="waitForm">
+                            <form asp-action="Wait" asp-route-id="@o.Id" method="post" class="d-grid gap-2">
+                                <input type="hidden" name="version" value="@o.Version" />
+                                <input type="text" class="form-control" name="reason" maxlength="500" required placeholder="等待什麼零件？預計何時到貨？" aria-label="待料原因" />
+                                <button type="submit" class="btn btn-warning">設為待料</button>
+                            </form>
+                        </div>
+                    }
+                    @if (can.Cancel)
+                    {
+                        <button type="button" class="btn btn-link text-danger" data-bs-toggle="collapse" data-bs-target="#cancelForm" aria-expanded="false" aria-controls="cancelForm">
+                            取消工單
+                        </button>
+                        <div class="collapse" id="cancelForm">
+                            <form asp-action="Cancel" asp-route-id="@o.Id" method="post" class="d-grid gap-2" data-confirm="取消後無法復原，確定要取消這張工單？">
+                                <input type="hidden" name="version" value="@o.Version" />
+                                <input type="text" class="form-control" name="reason" maxlength="500" required placeholder="取消原因" aria-label="取消原因" />
+                                <button type="submit" class="btn btn-danger">確認取消</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+
+        <section class="card mb-3">
+            <div class="card-body">
+                <h2 class="h5">資產</h2>
+                <a class="fw-semibold" asp-controller="Assets" asp-action="Details" asp-route-id="@o.Asset.Id">@o.Asset.AssetNo @o.Asset.Name</a>
+                <div class="small text-secondary">@o.Asset.CategoryName・<span class="badge @o.Asset.Status.BadgeClass()">@o.Asset.Status.Label()</span></div>
+                <div class="small"><i class="bi bi-geo-alt"></i> @o.Asset.LocationPath</div>
+                <div class="small"><i class="bi bi-person"></i> 保管人：@(o.Asset.CustodianName ?? "—")</div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-body">
+                <h2 class="h5">工單資訊</h2>
+                <dl class="row detail-list mb-0">
+                    <dt class="col-4">申請人</dt>
+                    <dd class="col-8">
+                        @(o.RequesterName ?? "系統產生")
+                        @if (isStaff && o.RequesterPhone is not null) { <a class="d-block" href="tel:@o.RequesterPhone">@o.RequesterPhone</a> }
+                    </dd>
+                    <dt class="col-4">負責人</dt><dd class="col-8">@(o.AssigneeName ?? "未指派")</dd>
+                    <dt class="col-4">建立</dt><dd class="col-8">@Clock.Format(o.CreatedAt)</dd>
+                    @if (o.ResponseDueAt is not null)
+                    {
+                        <dt class="col-4">回應期限</dt><dd class="col-8 @(o.ResponseOverdue ? "text-danger" : "")">@Clock.Format(o.ResponseDueAt)</dd>
+                        <dt class="col-4">回應</dt><dd class="col-8">@Clock.Format(o.RespondedAt)</dd>
+                    }
+                    <dt class="col-4">完工期限</dt><dd class="col-8 @(o.ResolveOverdue ? "text-danger" : "")">@Clock.Format(o.ResolveDueAt)</dd>
+                    <dt class="col-4">開始</dt><dd class="col-8">@Clock.Format(o.StartedAt)</dd>
+                    <dt class="col-4">完工</dt><dd class="col-8">@Clock.Format(o.CompletedAt)</dd>
+                    <dt class="col-4">結案</dt><dd class="col-8">@Clock.Format(o.ClosedAt)</dd>
+                </dl>
+            </div>
+        </section>
+    </div>
+</div>

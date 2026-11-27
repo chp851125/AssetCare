@@ -1,0 +1,14 @@
+@model IReadOnlyList<RelatedWorkOrder>
+<ul class="list-group">
+    @foreach (var order in Model)
+    {
+        <a class="list-group-item list-group-item-action" asp-controller="WorkOrders" asp-action="Details" asp-route-id="@order.Id">
+            <div class="d-flex justify-content-between gap-2">
+                <span class="small text-secondary">@order.OrderNo</span>
+                <span class="badge align-self-start @order.Status.BadgeClass()">@order.Status.Label()</span>
+            </div>
+            <div>@order.Title</div>
+            <div class="small text-secondary">@Clock.Format(order.CreatedAt)・通報人：@(order.RequesterName ?? "系統")</div>
+        </a>
+    }
+</ul>

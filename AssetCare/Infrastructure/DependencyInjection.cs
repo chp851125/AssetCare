@@ -1,6 +1,8 @@
 using AssetCare.Application.Interfaces;
 using AssetCare.Application.Services;
 using AssetCare.Domain.Entities;
+using AssetCare.Infrastructure.Background;
+using AssetCare.Infrastructure.Email;
 using AssetCare.Infrastructure.Excel;
 using AssetCare.Infrastructure.Files;
 using AssetCare.Infrastructure.Json;
@@ -21,6 +23,9 @@ public static class DependencyInjection
         services.AddSingleton<ISpreadsheetService, ClosedXmlSpreadsheetService>();
         services.AddSingleton<IFileStorage, LocalFileStorage>();
         services.AddSingleton<IQrCodeGenerator, QrCodeGenerator>();
+        services.Configure<EmailOptions>(configuration.GetSection("Email"));
+        services.AddSingleton<IEmailSender, OutboxEmailSender>();
+        services.AddHostedService<ScanBackgroundService>();
         return services;
     }
 
@@ -37,7 +42,16 @@ public static class DependencyInjection
         services.AddScoped<AssetService>();
         services.AddScoped<IAssetService>(sp => sp.GetRequiredService<AssetService>());
         services.AddScoped<IAssetExcelService, AssetExcelService>();
-        services.AddScoped<IAttachmentService, AttachmentService>();
+        services.AddScoped<AttachmentService>();
+        services.AddScoped<IAttachmentService>(sp => sp.GetRequiredService<AttachmentService>());
+        services.AddScoped<PartService>();
+        services.AddScoped<IPartService>(sp => sp.GetRequiredService<PartService>());
+        services.AddScoped<IVendorService, VendorService>();
+        services.AddScoped<IWorkOrderService, WorkOrderService>();
+        services.AddScoped<IWorkOrderWorkflowService, WorkOrderWorkflowService>();
+        services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
+        services.AddScoped<ISlaService, SlaService>();
+        services.AddScoped<IReminderService, ReminderService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ILocationService, LocationService>();
         return services;

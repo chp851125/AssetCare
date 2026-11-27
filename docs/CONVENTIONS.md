@@ -12,14 +12,14 @@
 | 路徑 | 命名空間 | 內容 |
 |---|---|---|
 | `Domain/Entities`、`Enums`、`Exceptions`、`Rules` | `AssetCare.Domain.*` | 實體、列舉（集中於 `Enums.cs`）、例外、無相依的商業規則 |
-| `Application/Services`、`Interfaces`、`Dtos` | `AssetCare.Application.*` | 商業邏輯；`AuditActions`、`SettingKeys` 與共用輔助（`CurrentUserExtensions`、`SettingExtensions`、`InputText`、`EnumNames`）放 `Application/` 根目錄 |
-| `Infrastructure/Json`（含 `Seeding`）、`Excel`、`Files`、`Qr`、`Background`、`Email` | `AssetCare.Infrastructure.*` | JSON 資料層、種子工具；ClosedXML、附件實體檔、QRCoder 的轉接；背景服務與 Email（階段 3） |
+| `Application/Services`、`Interfaces`、`Dtos` | `AssetCare.Application.*` | 商業邏輯；`AuditActions`、`SettingKeys` 與共用輔助（`CurrentUserExtensions`、`SettingExtensions`、`InputText`、`EnumNames`、`WorkOrderAccess`、`WorkOrderLinks`）放 `Application/` 根目錄 |
+| `Infrastructure/Json`（含 `Seeding`）、`Excel`、`Files`、`Qr`、`Background`、`Email` | `AssetCare.Infrastructure.*` | JSON 資料層、種子工具；ClosedXML、附件實體檔、QRCoder 的轉接；`ScanBackgroundService`、`OutboxEmailSender` |
 | `Web/Controllers`、`Views`、`ViewModels`、`ViewComponents`、`Infrastructure` | `AssetCare.Web.*` | 展示層；`Web/Infrastructure` 放驗證、過濾器、擴充方法 |
 | `SeedData/` | — | 範例資料（進 Git） |
 | `App_Data/`、`logs/`、`outbox/` | — | 執行期資料（不進 Git） |
 
 相依方向：Controller / ViewComponent → Service 介面 → `IRepository<T>`。Application 與 Domain **不得出現 JSON 或 Infrastructure 型別**。
-第三方套件（ClosedXML、QRCoder）與檔案系統一律經由 Application 介面（`ISpreadsheetService`、`IQrCodeGenerator`、`IFileStorage`）。
+第三方套件（ClosedXML、QRCoder）與檔案系統一律經由 Application 介面（`ISpreadsheetService`、`IQrCodeGenerator`、`IFileStorage`、`IEmailSender`）。
 
 Razor 檢視位置已改為 `/Web/Views/{controller}/{view}.cshtml` 與 `/Web/Views/Shared/`（設定於 `Program.cs`）。
 
@@ -64,7 +64,7 @@ Razor 檢視位置已改為 `/Web/Views/{controller}/{view}.cshtml` 與 `/Web/Vi
 - 登入失敗鎖定次數與時間讀自 AppSettings。
 - 稽核：呼叫 `IAuditService.Record(AuditActions.Xxx, nameof(實體), id, 名稱, 說明)`；新動作代碼登錄於 `AuditActions`。
 
-### 權限矩陣（階段 2）
+### 權限矩陣（資產與系統管理）
 | 功能 | 申請人 | 技術員 | 主管 | 管理員 |
 |---|---|---|---|---|
 | 資產清單、詳情（基本資料、保固、位置、保養計畫） | ✓ | ✓ | ✓ | ✓ |
@@ -74,10 +74,60 @@ Razor 檢視位置已改為 `/Web/Views/{controller}/{view}.cshtml` 與 `/Web/Vi
 | 成本與折舊、資產新增／編輯／轉移／報廢、匯入匯出、類別與地點 | | | ✓ | ✓ |
 | 使用者管理 | | | | ✓ |
 
+### 權限矩陣（工單、零件、通知）
+| 功能 | 申請人 | 技術員 | 主管 | 管理員 |
+|---|---|---|---|---|
+| 報修、自己的工單（檢視、留言、照片） | ✓ | ✓ | ✓ | ✓ |
+| 他人的工單 | 僅近期重複報修的摘要 | 檢視、留言 | ✓ | ✓ |
+| 清單分頁 | 我的報修 | 我的待辦、待派工、我的報修、全部 | 待派工、全部、我的報修 | 同主管 |
+| 接單（未指派） | | ✓ | | |
+| 開始、待料、恢復、完工、領料、外送、送回 | | 僅指派給自己 | ✓ | ✓ |
+| 派工、改派 | | | ✓ | ✓ |
+| 驗收、退回、取消 | 僅自己申請的 | 僅自己申請的 | ✓ | ✓ |
+| 零件清單與詳情 | | ✓ | ✓ | ✓ |
+| 零件新增／編輯／入庫／盤點、廠商維護 | | | ✓ | ✓ |
+| 通知中心 | 僅自己的 | 僅自己的 | 僅自己的 | 僅自己的 |
+
+- 清單中每個角色的**第一個分頁即預設分頁**（`WorkOrderService.AvailableScopes`）。
+- 工單資料擁有權一律用 `WorkOrderAccess`（`CanView`、`CanProcess`、`CanVerify`）。
+
 ## 檔案上傳
 - 允許的副檔名與大小讀自 AppSettings，且只能是 `AttachmentService.KnownTypes` 內的類型；檢查檔案開頭特徵碼，Content-Type 由伺服器決定。
 - 實體檔以隨機名稱存放；下載一律經 `/Attachments/Download/{id}` 授權（圖片內嵌、其他下載、`nosniff`）。
-- 工單附件的存取規則尚未建立（目前回 404），階段 3 於 `AttachmentService` 擴充。
+- 工單照片：僅圖片類型、一次最多 5 張；申請人、負責技術員、主管可上傳（限未結案工單）；可完整檢視工單者才能下載；上傳者本人（未結案時）或主管可刪除。
+- 與其他異動一起送出的照片，先用 `AttachmentService.CheckPhotos` 全部檢查，主要資料寫入後再 `Save`。
+- 含多檔上傳的 action 加 `[RequestSizeLimit]`（55 MB）；畫面用 `_PhotoInput`。
+
+## 工單
+- 讀寫分離：`IWorkOrderService`（查詢）、`IWorkOrderWorkflowService`（所有異動）。工單狀態**只能**由 workflow service 變更。
+- 動作是否允許由 `WorkOrderStateMachine.Allows(動作, 目前狀態)` 判斷（不可只看目標狀態：「恢復處理」與「驗收退回」都回到處理中）。拒絕時用 `WorkOrderWorkflowService.EnsureAllowed` 的訊息。
+- 狀態：派工／接單 Open→Assigned；開始 Assigned→InProgress；待料 InProgress↔WaitingParts；完工 InProgress→Completed；驗收 Completed→Closed；退回 Completed→InProgress；取消 Open、Assigned→Cancelled。
+- 不改狀態的動作：改派（Assigned／InProgress／WaitingParts）、領料（InProgress／WaitingParts）、外送與送回（Assigned／InProgress／WaitingParts，需已指派）。留言任何狀態皆可。
+- 每個異動寫一筆 `WorkOrderLog`；表單帶 `version`，工單 `Update` 排在扣庫存等其他寫入之前。
+- 派工、改派、取消寫稽核（開單亦寫）；其餘處理步驟以工單歷程為準。
+- 工單標題取故障描述第一行（最長 40 字），報修表單不另填標題。
+- 設備在廠商處（有廠商且無回廠日）時不可完工、取消或再次外送。多次外送時 `VendorCost` 累計。
+- 「近期重複報修」：同資產、未取消的報修工單，建立時間在 `workOrder.duplicateReportDays` 天內（剛好滿天數仍算）；只提示不阻擋。
+- 逾時顯示用 `WorkOrderRules.IsResponseOverdue／IsResolveOverdue`（已標示或即時判斷）；取消的工單只保留既有標示。
+
+## 零件
+- 庫存只能經由入庫、工單領用、盤點調整變更，每次寫一筆 `PartTransaction`。領用**一定要指定工單**（零件頁領用亦同）。
+- 扣庫存流程：鎖內先 `PartService.CheckAvailability`（同零件多列合併），再 `Consume`；鎖外 `NotifyLowStock`。
+- 低庫存用 `PartRules.IsLowStock`（啟用中且庫存 < 安全量）；只在「由正常變低」時通知。
+- 入庫單價會更新零件單價；用料成本以領用當下單價為準。零件與廠商不刪除（用停用）。料號 `PRT-0001`。
+
+## 通知與背景作業
+- 發通知一律用 `INotificationDispatcher.Send`（自動排除操作者本人與停用帳號，同時寫 .eml 與 `EmailLog`），在 `IBusinessLock` 之外呼叫。
+- `.eml` 寫入 `Email:OutboxDirectory`（預設 `outbox/`）；寄件人設定於 `appsettings.json` 的 `Email`。郵件內連結前綴為 `App:PublicBaseUrl`（空白時為相對路徑）。
+- `ScanBackgroundService`：啟動時及每 5 分鐘執行 `ISlaService.ScanOverdue` 與 `IReminderService.SendDueReminders`。背景呼叫的服務不可依賴登入身分。
+- SLA 逾時各標示一次；已結案者只標示不通知。到期提醒以「類型＋連結＋含日期的標題」避免重複。
+- 掃描標示逾時會更新工單版本，開著舊畫面送出時會看到並行衝突提示。
+
+## 掃碼
+- QR 入口 `/Assets/ByNo/{編號}` 導向 `/WorkOrders/Create?assetId=`（已報廢則轉資產詳情並說明）。
+- 系統內掃碼頁（`wwwroot/js/scan.js`）只取出資產編號，經 `/Scan/Asset?code=` 導向**資產詳情**（可報修、查歷史）；不直接開啟掃到的網址。
+- 相機需 HTTPS 或 localhost。手機測試：`dotnet run --project AssetCare --launch-profile lan-https`，手機開 `https://電腦IP:7171`（需信任開發憑證；完整說明於階段 4 寫入 README）。
+
 
 ## 開發環境工具
 - 快速切換使用者（`POST /Dev/SwitchUser`）：僅 Development，預設僅本機連線；手機測試需要時設 `DevTools:AllowRemoteQuickSwitch=true`（注意：同網段任何人都能切成管理員）。
@@ -101,22 +151,25 @@ Razor 檢視位置已改為 `/Web/Views/{controller}/{view}.cshtml` 與 `/Web/Vi
 - 驗收退回：`CompletedAt` 清空、`ReworkCount`+1，保留前次完工填寫內容。
 - 工單日誌：狀態變更記 `FromStatus`/`ToStatus`；留言、領料、外送等兩者皆 null。
 - `PartTransaction.Quantity` 帶正負號，`BalanceAfter` 為異動後庫存。
-- 單號（`WO`、`PM` 於階段 3、4 實作）：`WO-yyyyMMdd-0001`、`PM-yyyyMMdd-0001`（台北日期）、`AST-類別代碼-0001`；以鎖內取現有最大序號 +1 配號。
+- 單號：`WO-yyyyMMdd-0001`、`PM-yyyyMMdd-0001`（台北日期，`WorkOrderRules.NextOrderNo`；PM 由階段 4 使用）、`AST-類別代碼-0001`；以鎖內取現有最大序號 +1 配號。
 - 資產編號建立後不變，因此類別不可改、使用中的類別代碼不可改。資產不提供刪除（用報廢）。
 - 資產地點、部門、保管人只能透過「轉移」變更（會留紀錄）。編輯只能在使用中／閒置間切換；維修中由工單控制。
-- 報廢需原因、無法復原；有未結案工單時拒絕；同時停用該資產的保養計畫。已報廢資產用 `AssetRules.EnsureNotScrapped` 擋下編輯、轉移、再報廢；**階段 3 開立工單、階段 4 建立保養計畫與產生工單也必須呼叫**。
+- 報廢需原因、無法復原；有未結案工單時拒絕；同時停用該資產的保養計畫。已報廢資產用 `AssetRules.EnsureNotScrapped` 擋下編輯、轉移、再報廢；開立工單已呼叫；**階段 4 建立保養計畫與產生工單也必須呼叫**。
 - 折舊用 `DepreciationCalculator`：直線法、按滿月、四捨五入到元，帳面價值介於殘值與成本之間；報廢資產計算到報廢日。
 - 保固狀態用 `WarrantyRules`：到期日當天仍在保固內，剩餘天數 ≤ `warranty.noticeDays` 為即將到期。
-- QR 標籤內容為 `{網址}/Assets/ByNo/{資產編號}`（用編號，重置資料後仍有效）。網址取 `App:PublicBaseUrl`，空白時用目前請求的主機。**階段 3 的掃碼報修沿用此入口**。
+- QR 標籤內容為 `{網址}/Assets/ByNo/{資產編號}`（用編號，重置資料後仍有效）。網址取 `App:PublicBaseUrl`，空白時用目前請求的主機。
 - 非空白的序號不可重複（僅在新增、匯入、序號變更時檢查）。
 - Excel 匯入全有或全無，上限 500 列；欄位定義於 `AssetExcelService.Columns`，匯出欄位為其超集。
 - 密碼原則 `PasswordRules`：最短長度讀設定、需含英文與數字、不可包含帳號、最長 100。
 - 使用者不提供刪除（用停用）。帳號建立後不可改。不可停用自己或改自己的角色，至少保留一位啟用中的管理員。技術員有未結案工單時不可改角色；停用不阻擋，僅提醒交接。
+- 保養工單可走一般工單流程；檢查清單目前唯讀。**階段 4 須補：逐項勾選、完工後重算計畫下次保養日**（掛在 `WorkOrderWorkflowService.Complete`），並實作 `MaintenancePlansController.Details`（目前為預留頁）。
 - 站內連結格式：`/WorkOrders/Details/{id}`、`/Assets/Details/{id}`、`/Parts/Details/{id}`、`/MaintenancePlans/Details/{id}`（範例通知已使用，Controller 命名需一致）。
 
 ## 前端與版型
 - 函式庫放 `wwwroot/lib`，不用 CDN：bootstrap 5.3、bootstrap-icons、echarts、html5-qrcode、fullcalendar（含 `zh-tw.global.min.js`）、jquery 與表單驗證。
-- 樣式寫在 `wwwroot/css/site.css`，主色 `--app-primary`；不使用 scoped CSS。共用 JS 在 `wwwroot/js/site.js`。
+- 樣式寫在 `wwwroot/css/site.css`，主色 `--app-primary`；不使用 scoped CSS。共用 JS 在 `wwwroot/js/site.js`，單頁腳本另立檔案（如 `scan.js`）。
+- 手機主要操作按鈕放 `.action-bar`（固定在底部導覽上方）。處理歷程用 `.timeline`。優先級標籤用 `Priority.BadgeClass()`。
+- `site.js`：POST 表單送出後自動停用按鈕防重複送出；`data-max-files`／`data-max-mb`／`data-preview` 檢查並預覽照片；`data-scroll-to` 展開後捲動。
 - 版型 `_Layout`：`lg` 以上用上方導覽，以下用 `_BottomNav`（首頁、掃碼、我的工單、通知、我）。新增桌面選單項目時，手機需能從首頁或「我」頁到達。
 - 手機：清單用卡片呈現（`d-lg-none` 卡片 + `d-none d-lg-block` 表格），觸控目標 ≥ 44px。
 - 清單查詢條件用 `XxxQuery`（GET 繫結），回傳 `PagedResult<T>`（每頁 10 筆），分頁用 `<partial name="_Pager" model="PagerViewModel.From(result)" />`。

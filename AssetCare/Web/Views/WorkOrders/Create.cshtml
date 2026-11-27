@@ -1,0 +1,66 @@
+@model ReportViewModel
+@{
+    ViewData["Title"] = "報修";
+    var asset = Model.Context.Asset;
+}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <h1 class="h4 mb-3">報修</h1>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between gap-2">
+                    <span class="small text-secondary">@asset.AssetNo・@asset.CategoryName</span>
+                    <span class="badge align-self-start @asset.Status.BadgeClass()">@asset.Status.Label()</span>
+                </div>
+                <div class="fs-5 fw-semibold">@asset.Name</div>
+                <div class="small text-secondary"><i class="bi bi-geo-alt"></i> @asset.LocationPath</div>
+                <div class="small text-secondary"><i class="bi bi-person"></i> 保管人：@(asset.CustodianName ?? "—")</div>
+                <div class="d-flex gap-3 mt-2">
+                    <a asp-controller="Assets" asp-action="Details" asp-route-id="@asset.Id" class="py-2">查看資料與歷史</a>
+                    <a asp-action="Create" class="py-2">換一台設備</a>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Context.Recent.Count > 0)
+        {
+            <div class="alert alert-warning mb-2" role="alert">
+                <i class="bi bi-exclamation-triangle"></i>
+                <strong>此設備 @Model.Context.DuplicateDays 天內已有 @Model.Context.Recent.Count 筆報修。</strong>
+                請先確認是否為同一問題；若是，可點開既有工單查看進度，不必重複送出。
+            </div>
+            <div class="mb-3"><partial name="_RelatedOrders" model="Model.Context.Recent" /></div>
+        }
+
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+            <input type="hidden" asp-for="AssetId" />
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="4" maxlength="1000" placeholder="發生什麼狀況？何時開始？有無異音、異味或錯誤訊息？"></textarea>
+                <div class="form-text">第一行會作為工單標題。</div>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+            <fieldset class="mb-3">
+                <legend class="form-label fs-6">優先級</legend>
+                <div class="btn-group w-100" role="group">
+                    @foreach (var p in Enum.GetValues<Priority>())
+                    {
+                        <input type="radio" class="btn-check" name="Priority" id="priority-@p" value="@p" checked="@(Model.Priority == p)" />
+                        <label class="btn btn-outline-@(p == Priority.Urgent ? "danger" : "primary") py-2" for="priority-@p">@p.Label()</label>
+                    }
+                </div>
+                <div class="form-text">「緊急」用於停機、漏電、漏水或有安全疑慮的狀況。</div>
+            </fieldset>
+            <div class="mb-3">
+                <label asp-for="Photos" class="form-label" for="photo-Photos"></label>
+                <partial name="_PhotoInput" model='new PhotoInputViewModel("Photos", Model.Rules)' />
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100"><i class="bi bi-send"></i> 送出報修</button>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

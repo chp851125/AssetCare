@@ -1,0 +1,61 @@
+@model CompleteViewModel
+@{
+    ViewData["Title"] = "完工回報";
+    var c = Model.Context;
+}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <a class="d-inline-block mb-2" asp-action="Details" asp-route-id="@c.Id"><i class="bi bi-chevron-left"></i> 回工單</a>
+        <h1 class="h4 mb-1">完工回報</h1>
+        <p class="text-secondary">@c.OrderNo・@c.AssetName<br />@c.Title</p>
+
+        <form asp-action="Complete" asp-route-id="@c.Id" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+            <input type="hidden" asp-for="Version" />
+            <div class="mb-3">
+                <label asp-for="FaultCause" class="form-label"></label>
+                <textarea asp-for="FaultCause" class="form-control" rows="2" maxlength="1000"></textarea>
+                <span asp-validation-for="FaultCause" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Resolution" class="form-label"></label>
+                <textarea asp-for="Resolution" class="form-control" rows="3" maxlength="1000"></textarea>
+                <span asp-validation-for="Resolution" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="LaborHours" class="form-label"></label>
+                <input asp-for="LaborHours" class="form-control form-control-lg" type="number" step="0.25" min="0" inputmode="decimal" />
+                <span asp-validation-for="LaborHours" class="text-danger small"></span>
+            </div>
+            <fieldset class="mb-3">
+                <legend class="form-label fs-6">使用零件（選填，送出時扣庫存）</legend>
+                @for (var i = 0; i < Model.Parts.Count; i++)
+                {
+                    <div class="row g-2 mb-2">
+                        <div class="col-8">
+                            <select class="form-select" name="Parts[@i].PartId" aria-label="零件 @(i + 1)">
+                                <option value="">—</option>
+                                @foreach (var part in c.PartOptions)
+                                {
+                                    <option value="@part.Id" selected="@(Model.Parts[i].PartId == part.Id)" disabled="@(part.Stock == 0)">@part.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <input type="number" class="form-control" name="Parts[@i].Quantity" value="@Model.Parts[i].Quantity" min="1" step="1" inputmode="numeric" placeholder="數量" aria-label="數量 @(i + 1)" />
+                        </div>
+                    </div>
+                }
+                <div class="form-text">已在工單頁領用過的零件不需重複填寫。</div>
+            </fieldset>
+            <div class="mb-3">
+                <label class="form-label" for="photo-Photos">完工照片</label>
+                <partial name="_PhotoInput" model='new PhotoInputViewModel("Photos", Model.Rules)' />
+            </div>
+            <button type="submit" class="btn btn-success btn-lg w-100"><i class="bi bi-check2-circle"></i> 送出完工回報</button>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

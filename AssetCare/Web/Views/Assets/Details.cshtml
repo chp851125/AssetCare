@@ -16,9 +16,13 @@
         <span class="badge @Model.Status.BadgeClass()">@Model.Status.Label()</span>
         <span class="badge @Model.Warranty.BadgeClass()">@Model.Warranty.Label()</span>
     </div>
-    @if (isStaff)
-    {
-        <div class="d-flex flex-wrap gap-2">
+    <div class="d-flex flex-wrap gap-2">
+        @if (!scrapped)
+        {
+            <a class="btn btn-warning" asp-controller="WorkOrders" asp-action="Create" asp-route-assetId="@Model.Id"><i class="bi bi-tools"></i> 報修</a>
+        }
+        @if (isStaff)
+        {
             @if (isManager && !scrapped)
             {
                 <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Id"><i class="bi bi-pencil"></i> 編輯</a>
@@ -26,8 +30,8 @@
                 <a class="btn btn-outline-danger" asp-action="Scrap" asp-route-id="@Model.Id"><i class="bi bi-trash3"></i> 報廢</a>
             }
             <a class="btn btn-outline-secondary" asp-action="Labels" asp-route-ids="@Model.Id"><i class="bi bi-qr-code"></i> 列印標籤</a>
-        </div>
-    }
+        }
+    </div>
 </div>
 
 @if (scrapped)
@@ -121,7 +125,7 @@
                                     <span class="small text-secondary">@w.OrderNo・@w.Type.Label()・@w.Priority.Label()</span>
                                     <span class="badge align-self-start @w.Status.BadgeClass()">@w.Status.Label()</span>
                                 </div>
-                                <div>@w.Title</div>
+                                <a class="d-block py-1" asp-controller="WorkOrders" asp-action="Details" asp-route-id="@w.Id">@w.Title</a>
                                 <div class="small text-secondary">@Clock.Format(w.CreatedAt)・負責人：@(w.AssigneeName ?? "未指派")</div>
                             </li>
                         }

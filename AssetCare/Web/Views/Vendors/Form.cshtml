@@ -1,0 +1,64 @@
+@model VendorFormViewModel
+@{
+    var isNew = Model.Id is null;
+    ViewData["Title"] = isNew ? "新增廠商" : "編輯廠商";
+}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <h1 class="h4 mb-3">@ViewData["Title"]</h1>
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="@(isNew ? "Create" : "Edit")" asp-route-id="@Model.Id" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+                    <input type="hidden" asp-for="Version" />
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" maxlength="100" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="TaxId" class="form-label"></label>
+                            <input asp-for="TaxId" class="form-control" maxlength="8" inputmode="numeric" />
+                            <span asp-validation-for="TaxId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="ContactName" class="form-label"></label>
+                            <input asp-for="ContactName" class="form-control" maxlength="50" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Phone" class="form-label"></label>
+                            <input asp-for="Phone" class="form-control" maxlength="30" type="tel" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" maxlength="100" type="email" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Address" class="form-label"></label>
+                            <input asp-for="Address" class="form-control" maxlength="200" />
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="ServiceScope" class="form-label"></label>
+                            <input asp-for="ServiceScope" class="form-control" maxlength="200" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-check py-1">
+                                <input asp-for="IsActive" class="form-check-input" />
+                                <span class="form-check-label">啟用（停用後不可再指定外送）</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary">儲存</button>
+                        <a class="btn btn-link" asp-action="Index">取消</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

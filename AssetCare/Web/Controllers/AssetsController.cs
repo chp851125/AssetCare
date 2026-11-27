@@ -31,10 +31,12 @@ public class AssetsController(
         return View(assets.GetDetail(id));
     }
 
-    /// <summary>QR 標籤的固定入口：以資產編號導向詳情頁，重置資料後標籤仍有效。</summary>
+    /// <summary>
+    /// QR 標籤的固定入口：以資產編號導向該資產的報修頁（已報廢時由報修頁轉到詳情），重置資料後標籤仍有效。
+    /// </summary>
     [HttpGet("/Assets/ByNo/{assetNo}")]
     public IActionResult ByNo(string assetNo) =>
-        RedirectToAction(nameof(Details), new { id = assets.GetIdByAssetNo(assetNo) });
+        RedirectToAction("Create", "WorkOrders", new { assetId = assets.GetIdByAssetNo(assetNo) });
 
     [Authorize(Roles = Roles.Managers), HttpGet]
     public IActionResult Create()

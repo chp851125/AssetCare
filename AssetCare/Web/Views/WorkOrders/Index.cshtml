@@ -1,0 +1,165 @@
+@model WorkOrderIndexViewModel
+@{
+    ViewData["Title"] = "工單";
+    var q = Model.Query;
+    var list = Model.List;
+    var filtered = !string.IsNullOrWhiteSpace(q.Keyword) || q.Status != null || q.Priority != null ||
+                   q.Type != null || q.OverdueOnly;
+    var scopeNames = new Dictionary<WorkOrderScope, string>
+    {
+        [WorkOrderScope.Mine] = "我的報修", [WorkOrderScope.Open] = "待派工",
+        [WorkOrderScope.Todo] = "我的待辦", [WorkOrderScope.All] = "全部"
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 mb-0">工單</h1>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> 我要報修</a>
+</div>
+
+@if (list.AvailableScopes.Count > 1)
+{
+    <ul class="nav nav-pills nav-fill flex-nowrap mb-3 scope-tabs">
+        @foreach (var scope in list.AvailableScopes)
+        {
+            <li class="nav-item">
+                <a class="nav-link @(scope == list.Scope ? "active" : "")" asp-action="Index" asp-route-scope="@scope">@scopeNames[scope]</a>
+            </li>
+        }
+    </ul>
+}
+
+<form method="get" asp-action="Index" class="card mb-3">
+    <div class="card-body">
+        <input type="hidden" name="Scope" value="@list.Scope" />
+        <div class="input-group">
+            <input type="search" class="form-control" name="Keyword" value="@q.Keyword" placeholder="單號、描述、資產編號或名稱" aria-label="關鍵字" />
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i><span class="visually-hidden">搜尋</span></button>
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#orderFilters" aria-expanded="@(filtered ? "true" : "false")" aria-controls="orderFilters">
+                <i class="bi bi-funnel"></i><span class="visually-hidden">篩選</span>
+            </button>
+        </div>
+        <div class="collapse @(filtered ? "show" : "")" id="orderFilters">
+            <div class="row g-2 mt-1">
+                <div class="col-6 col-md-3">
+                    <label class="form-label small mb-1" for="f-status">狀態</label>
+                    <select class="form-select" id="f-status" name="Status">
+                        <option value="">全部</option>
+                        @foreach (var s in Enum.GetValues<WorkOrderStatus>())
+                        {
+                            <option value="@s" selected="@(q.Status == s)">@s.Label()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label small mb-1" for="f-priority">優先級</label>
+                    <select class="form-select" id="f-priority" name="Priority">
+                        <option value="">全部</option>
+                        @foreach (var p in Enum.GetValues<Priority>())
+                        {
+                            <option value="@p" selected="@(q.Priority == p)">@p.Label()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label small mb-1" for="f-type">類型</label>
+                    <select class="form-select" id="f-type" name="Type">
+                        <option value="">全部</option>
+                        @foreach (var t in Enum.GetValues<WorkOrderType>())
+                        {
+                            <option value="@t" selected="@(q.Type == t)">@t.Label()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-6 col-md-3 d-flex align-items-end">
+                    <label class="form-check py-2 mb-0">
+                        <input type="checkbox" class="form-check-input" name="OverdueOnly" value="true" checked="@q.OverdueOnly" />
+                        <span class="form-check-label">僅逾時</span>
+                    </label>
+                </div>
+                <div class="col-12 d-flex gap-2 justify-content-end">
+                    <a class="btn btn-link" asp-action="Index" asp-route-scope="@list.Scope">清除條件</a>
+                    <button type="submit" class="btn btn-primary">套用</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@if (list.Result.Total == 0)
+{
+    <div class="empty-state">
+        <i class="bi bi-clipboard-check"></i>
+        <p class="text-secondary">沒有符合條件的工單。</p>
+    </div>
+}
+else
+{
+    <div class="d-lg-none">
+        @foreach (var w in list.Result.Items)
+        {
+            <div class="card mb-2 @(w.ResponseOverdue || w.ResolveOverdue ? "border-danger" : "")">
+                <a class="card-body py-2 text-reset text-decoration-none" asp-action="Details" asp-route-id="@w.Id">
+                    <div class="d-flex justify-content-between gap-2">
+                        <span class="small text-secondary">@w.OrderNo・@w.Type.Label()</span>
+                        <span class="badge align-self-start @w.Status.BadgeClass()">@w.Status.Label()</span>
+                    </div>
+                    <div class="fw-semibold">@w.Title</div>
+                    <div class="small text-secondary">@w.AssetName・@w.LocationName</div>
+                    <div class="small text-secondary">負責人：@(w.AssigneeName ?? "未指派")・期限 @Clock.Format(w.ResolveDueAt, "MM/dd HH:mm")</div>
+                    <div class="mt-1">
+                        <span class="badge @w.Priority.BadgeClass()">@w.Priority.Label()</span>
+                        @if (w.ResolveOverdue) { <span class="badge text-bg-danger">完工逾時</span> }
+                        else if (w.ResponseOverdue) { <span class="badge text-bg-danger">回應逾時</span> }
+                    </div>
+                </a>
+                @if (w.CanAccept || w.CanStart)
+                {
+                    <div class="card-footer bg-white">
+                        <form asp-action="@(w.CanAccept ? "Accept" : "Start")" asp-route-id="@w.Id" method="post" class="d-grid">
+                            <input type="hidden" name="version" value="@w.Version" />
+                            <button type="submit" class="btn btn-primary btn-lg">@(w.CanAccept ? "接單" : "開始處理")</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="card d-none d-lg-block">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">單號</th><th scope="col">標題／資產</th><th scope="col">優先級</th>
+                        <th scope="col">狀態</th><th scope="col">申請人</th><th scope="col">負責人</th>
+                        <th scope="col">建立時間</th><th scope="col">完工期限</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var w in list.Result.Items)
+                    {
+                        <tr>
+                            <td class="text-nowrap">
+                                <a asp-action="Details" asp-route-id="@w.Id">@w.OrderNo</a>
+                                <div class="small text-secondary">@w.Type.Label()</div>
+                            </td>
+                            <td>@w.Title<div class="small text-secondary">@w.AssetNo @w.AssetName・@w.LocationName</div></td>
+                            <td><span class="badge @w.Priority.BadgeClass()">@w.Priority.Label()</span></td>
+                            <td><span class="badge @w.Status.BadgeClass()">@w.Status.Label()</span></td>
+                            <td class="text-nowrap">@(w.RequesterName ?? "系統")</td>
+                            <td class="text-nowrap">@(w.AssigneeName ?? "未指派")</td>
+                            <td class="text-nowrap">@Clock.Format(w.CreatedAt, "MM/dd HH:mm")</td>
+                            <td class="text-nowrap">
+                                @Clock.Format(w.ResolveDueAt, "MM/dd HH:mm")
+                                @if (w.ResolveOverdue) { <span class="badge text-bg-danger d-block">完工逾時</span> }
+                                else if (w.ResponseOverdue) { <span class="badge text-bg-danger d-block">回應逾時</span> }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+<partial name="_Pager" model="PagerViewModel.From(list.Result)" />

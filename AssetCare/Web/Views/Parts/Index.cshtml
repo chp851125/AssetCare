@@ -1,0 +1,98 @@
+@model PartIndexViewModel
+@{
+    ViewData["Title"] = "零件庫存";
+    var q = Model.Query;
+    var isManager = User.IsManager();
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 mb-0">零件庫存</h1>
+    @if (isManager)
+    {
+        <div class="d-flex gap-2">
+            <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> 新增零件</a>
+            <a class="btn btn-outline-secondary" asp-controller="Vendors" asp-action="Index"><i class="bi bi-building"></i> 廠商</a>
+        </div>
+    }
+</div>
+
+<form method="get" asp-action="Index" class="card mb-3">
+    <div class="card-body">
+        <div class="input-group">
+            <input type="search" class="form-control" name="Keyword" value="@q.Keyword" placeholder="料號、名稱、規格、存放位置" aria-label="關鍵字" />
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> 搜尋</button>
+        </div>
+        <div class="d-flex flex-wrap gap-3 mt-1">
+            <label class="form-check py-2 mb-0">
+                <input type="checkbox" class="form-check-input" name="LowStockOnly" value="true" checked="@q.LowStockOnly" />
+                <span class="form-check-label">僅低於安全量</span>
+            </label>
+            <label class="form-check py-2 mb-0">
+                <input type="checkbox" class="form-check-input" name="IncludeInactive" value="true" checked="@q.IncludeInactive" />
+                <span class="form-check-label">包含停用</span>
+            </label>
+        </div>
+    </div>
+</form>
+
+@if (Model.Result.Total == 0)
+{
+    <div class="empty-state">
+        <i class="bi bi-box-seam"></i>
+        <p class="text-secondary">沒有符合條件的零件。</p>
+    </div>
+}
+else
+{
+    <div class="d-lg-none">
+        @foreach (var p in Model.Result.Items)
+        {
+            <a class="card mb-2 text-reset text-decoration-none @(p.IsLowStock ? "border-danger" : "")" asp-action="Details" asp-route-id="@p.Id">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between gap-2">
+                        <span class="small text-secondary">@p.PartNo</span>
+                        <span>
+                            @if (!p.IsActive) { <span class="badge text-bg-secondary">停用</span> }
+                            @if (p.IsLowStock) { <span class="badge text-bg-danger">低於安全量</span> }
+                        </span>
+                    </div>
+                    <div class="fw-semibold">@p.Name</div>
+                    <div class="small text-secondary">@p.Spec</div>
+                    <div>庫存 <strong>@p.StockQuantity</strong> @p.Unit<span class="small text-secondary">（安全量 @p.SafetyStock）・@p.StorageLocation</span></div>
+                </div>
+            </a>
+        }
+    </div>
+
+    <div class="card d-none d-lg-block">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">料號</th><th scope="col">名稱</th><th scope="col">規格</th>
+                        <th scope="col" class="text-end">庫存</th><th scope="col" class="text-end">安全量</th>
+                        <th scope="col" class="text-end">單價</th><th scope="col">存放位置</th><th scope="col">標示</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Result.Items)
+                    {
+                        <tr class="@(p.IsLowStock ? "table-danger" : "")">
+                            <td class="text-nowrap"><a asp-action="Details" asp-route-id="@p.Id">@p.PartNo</a></td>
+                            <td>@p.Name</td>
+                            <td>@(p.Spec ?? "—")</td>
+                            <td class="text-end text-nowrap">@p.StockQuantity @p.Unit</td>
+                            <td class="text-end">@p.SafetyStock</td>
+                            <td class="text-end text-nowrap">NT$ @p.UnitCost.ToString("N0")</td>
+                            <td>@(p.StorageLocation ?? "—")</td>
+                            <td class="text-nowrap">
+                                @if (p.IsLowStock) { <span class="badge text-bg-danger">低於安全量</span> }
+                                @if (!p.IsActive) { <span class="badge text-bg-secondary">停用</span> }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+<partial name="_Pager" model="PagerViewModel.From(Model.Result)" />

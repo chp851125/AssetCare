@@ -27,6 +27,54 @@
     });
 })();
 
+// 防止重複送出：POST 表單送出後停用按鈕（需確認的表單由確認視窗處理）。
+document.addEventListener('submit', event => {
+    const form = event.target;
+    if (event.defaultPrevented || form.method !== 'post') return;
+    if (form.dataset.submitting) { event.preventDefault(); return; }
+    form.dataset.submitting = 'true';
+    form.querySelectorAll('[type="submit"]').forEach(button => button.classList.add('disabled'));
+});
+// 由瀏覽器「上一頁」回到畫面時恢復按鈕。
+window.addEventListener('pageshow', () => {
+    document.querySelectorAll('form[data-submitting]').forEach(form => {
+        delete form.dataset.submitting;
+        form.querySelectorAll('[type="submit"]').forEach(button => button.classList.remove('disabled'));
+    });
+});
+
+// 照片欄位：先在瀏覽器端檢查張數與大小（伺服器仍會檢查），並顯示縮圖。
+document.querySelectorAll('input[type="file"][data-max-files]').forEach(input => {
+    const preview = document.querySelector(input.dataset.preview);
+    input.addEventListener('change', () => {
+        preview?.querySelectorAll('img').forEach(image => URL.revokeObjectURL(image.src));
+        preview?.replaceChildren();
+        const files = [...input.files];
+        const maxFiles = Number(input.dataset.maxFiles);
+        const maxMb = Number(input.dataset.maxMb);
+        let error = '';
+        if (files.length > maxFiles) error = `一次最多 ${maxFiles} 張照片。`;
+        else if (files.some(file => file.size > maxMb * 1024 * 1024)) error = `單張照片不可超過 ${maxMb} MB。`;
+        input.setCustomValidity(error);
+        if (error) { input.reportValidity(); return; }
+        files.forEach(file => {
+            const image = document.createElement('img');
+            image.src = URL.createObjectURL(file);
+            image.alt = file.name;
+            preview?.append(image);
+        });
+    });
+});
+
+// 展開表單後捲動到該位置（觸發按鈕可能固定在畫面底部）。
+document.querySelectorAll('[data-scroll-to]').forEach(button => {
+    const target = document.querySelector(button.dataset.scrollTo);
+    target?.addEventListener('shown.bs.collapse', () => {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.querySelector('textarea, input:not([type="hidden"])')?.focus();
+    });
+});
+
 // 列印按鈕。
 document.addEventListener('click', event => {
     if (event.target.closest('[data-print]')) window.print();
