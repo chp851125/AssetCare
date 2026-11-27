@@ -1,0 +1,36 @@
+@model PagerViewModel
+@{
+    // 保留現有查詢條件，只替換頁碼。
+    string PageUrl(int page)
+    {
+        var query = Context.Request.Query
+            .Where(q => !string.Equals(q.Key, "page", StringComparison.OrdinalIgnoreCase))
+            .SelectMany(q => q.Value, (q, v) => new KeyValuePair<string, string?>(q.Key, v))
+            .Append(new KeyValuePair<string, string?>("page", page.ToString()));
+        return Context.Request.PathBase + Context.Request.Path + QueryString.Create(query);
+    }
+    var first = Math.Max(1, Math.Min(Model.Page - 2, Model.TotalPages - 4));
+    var last = Math.Min(Model.TotalPages, first + 4);
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 my-3">
+    <div class="text-secondary small">共 @Model.Total 筆，第 @Model.Page / @Model.TotalPages 頁</div>
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="分頁">
+            <ul class="pagination mb-0">
+                <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                    <a class="page-link" href="@PageUrl(Math.Max(1, Model.Page - 1))" aria-label="上一頁">&lsaquo;</a>
+                </li>
+                @for (var p = first; p <= last; p++)
+                {
+                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                        <a class="page-link" href="@PageUrl(p)">@p</a>
+                    </li>
+                }
+                <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" href="@PageUrl(Math.Min(Model.TotalPages, Model.Page + 1))" aria-label="下一頁">&rsaquo;</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>

@@ -1,0 +1,27 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    (string Controller, string Action, string Icon, string Text)[] items =
+    [
+        ("Home", "Index", "bi-house", "首頁"),
+        ("Scan", "Index", "bi-qr-code-scan", "掃碼"),
+        ("WorkOrders", "Mine", "bi-clipboard-check", "我的工單"),
+        ("Notifications", "Index", "bi-bell", "通知"),
+        ("Profile", "Index", "bi-person", "我")
+    ];
+}
+<nav class="bottom-nav d-lg-none" aria-label="主要導覽">
+    @foreach (var item in items)
+    {
+        var active = controller == item.Controller;
+        <a class="bottom-nav-item @(active ? "active" : "")" asp-controller="@item.Controller" asp-action="@item.Action" aria-current="@(active ? "page" : null)">
+            <span class="position-relative">
+                <i class="bi @item.Icon"></i>
+                @if (item.Controller == "Notifications")
+                {
+                    @await Component.InvokeAsync("NotificationBadge")
+                }
+            </span>
+            <span>@item.Text</span>
+        </a>
+    }
+</nav>

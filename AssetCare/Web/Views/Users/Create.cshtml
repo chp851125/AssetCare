@@ -1,0 +1,43 @@
+@model UserCreateViewModel
+@{ ViewData["Title"] = "新增使用者"; }
+<h1 class="h4 mb-3">新增使用者</h1>
+<form asp-action="Create" method="post" class="card" novalidate autocomplete="off">
+    <div class="card-body row g-3">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <div class="col-md-4">
+            <label asp-for="UserName" class="form-label"></label>
+            <input asp-for="UserName" class="form-control" maxlength="30" autocapitalize="none" autocomplete="off" />
+            <div class="form-text">建立後不可變更。</div>
+            <span asp-validation-for="UserName" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" class="form-control" autocomplete="new-password" />
+            <div class="form-text">至少 @Model.PasswordMinLength 個字元，含英文字母與數字，不可包含帳號。</div>
+            <span asp-validation-for="Password" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="ConfirmPassword" class="form-label"></label>
+            <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+        </div>
+        <partial name="_ProfileFields" model="Model" />
+        <div class="col-md-4">
+            <label asp-for="Role" class="form-label"></label>
+            <select asp-for="Role" class="form-select">
+                @foreach (var r in Enum.GetValues<UserRole>())
+                {
+                    <option value="@r">@r.Label()</option>
+                }
+            </select>
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">建立</button>
+            <a class="btn btn-outline-secondary btn-lg" asp-action="Index">取消</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

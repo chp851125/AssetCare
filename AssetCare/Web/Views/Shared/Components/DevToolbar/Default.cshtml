@@ -1,0 +1,26 @@
+@model DevToolbarViewModel
+@if (Model.Users.Count > 0)
+{
+    <div class="dropdown">
+        <button class="btn btn-sm btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="快速切換使用者（開發環境）">
+            <i class="bi bi-people"></i> <span class="d-none d-sm-inline">切換使用者</span>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end user-switcher">
+            <h6 class="dropdown-header">快速切換使用者（開發環境）</h6>
+            @foreach (var user in Model.Users)
+            {
+                <form asp-controller="Dev" asp-action="SwitchUser" method="post">
+                    <input type="hidden" name="userId" value="@user.Id" />
+                    <button type="submit" class="dropdown-item d-flex justify-content-between gap-3 @(User.Identity?.Name == user.UserName ? "active" : "")">
+                        <span>@user.DisplayName</span>
+                        <span class="small opacity-75">@user.Role.Label()</span>
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+}
+@if (Model.CanReset)
+{
+    <partial name="_ResetDataForm" model='"btn btn-sm btn-outline-light"' />
+}

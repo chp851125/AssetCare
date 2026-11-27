@@ -1,0 +1,16 @@
+@{ ViewData["Title"] = "系統管理"; }
+<h1 class="h4 mb-3">系統管理</h1>
+<div class="list-group mb-3">
+    <a class="list-group-item list-group-item-action py-3" asp-controller="Users" asp-action="Index"><i class="bi bi-people me-2"></i>使用者管理</a>
+</div>
+<p class="text-secondary">系統參數與稽核紀錄將於後續階段開放。</p>
+@if (DevTools.IsDevelopment)
+{
+    <div class="card border-danger-subtle">
+        <div class="card-body">
+            <h2 class="h5">重置為範例資料</h2>
+            <p class="text-secondary">清除目前所有資料並從範例資料重新建立（僅開發環境提供）。</p>
+            <partial name="_ResetDataForm" model='"btn btn-danger"' />
+        </div>
+    </div>
+}

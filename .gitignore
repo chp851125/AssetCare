@@ -483,3 +483,8 @@ $RECYCLE.BIN/
 
 .claude/settings.local.json
 
+
+# AssetCare runtime data
+App_Data/
+logs/
+outbox/

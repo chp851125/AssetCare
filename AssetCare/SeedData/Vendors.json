@@ -1,0 +1,72 @@
+[
+  {
+    "name": "冠宇空調工程有限公司",
+    "taxId": "24567813",
+    "contactName": "李國源",
+    "phone": "02-2999-3180",
+    "email": "service@cool.assetcare.example",
+    "address": "新北市三重區重新路五段 609 號",
+    "serviceScope": "空調安裝、保養與冷媒回收",
+    "isActive": true,
+    "id": "c374f183-4ec9-6bd6-50c6-f43752897dc7",
+    "version": 1,
+    "createdAt": "2025-11-12T04:48:45Z",
+    "updatedAt": "2025-11-12T04:48:45Z"
+  },
+  {
+    "name": "宏碩資訊服務股份有限公司",
+    "taxId": "53921046",
+    "contactName": "周怡君",
+    "phone": "02-8751-6622",
+    "email": "service@info.assetcare.example",
+    "address": "台北市內湖區瑞光路 188 號 6 樓",
+    "serviceScope": "電腦硬體、印表機與 UPS 維修",
+    "isActive": true,
+    "id": "ceeea2ef-23ee-7f5c-3b95-da36fc3f7c75",
+    "version": 1,
+    "createdAt": "2025-11-12T04:48:45Z",
+    "updatedAt": "2025-11-12T04:48:45Z"
+  },
+  {
+    "name": "晟陽精密機械有限公司",
+    "taxId": "70384219",
+    "contactName": "邱政達",
+    "phone": "03-318-4477",
+    "email": "service@mach.assetcare.example",
+    "address": "桃園市龜山區文化二路 31 號",
+    "serviceScope": "CNC 加工機、空壓機與包裝機維修",
+    "isActive": true,
+    "id": "25918c94-8047-5f89-5e9c-6fd2d04ba2b8",
+    "version": 1,
+    "createdAt": "2025-11-12T04:48:45Z",
+    "updatedAt": "2025-11-12T04:48:45Z"
+  },
+  {
+    "name": "安固消防科技股份有限公司",
+    "taxId": "16750382",
+    "contactName": "何佩珊",
+    "phone": "02-2268-9051",
+    "email": "service@fire.assetcare.example",
+    "address": "新北市土城區中央路二段 96 號",
+    "serviceScope": "消防系統檢修申報與藥劑填充",
+    "isActive": true,
+    "id": "1b7a10ce-b026-609a-94f4-883474a06f11",
+    "version": 1,
+    "createdAt": "2025-11-12T04:48:45Z",
+    "updatedAt": "2025-11-12T04:48:45Z"
+  },
+  {
+    "name": "品誠辦公家具行",
+    "taxId": "38105627",
+    "contactName": "謝宗翰",
+    "phone": "02-2557-7340",
+    "email": "service@office.assetcare.example",
+    "address": "台北市大同區承德路二段 75 號",
+    "serviceScope": "辦公家具與會議室設備",
+    "isActive": true,
+    "id": "c6a37f49-58f7-6e7f-188e-7052b389aff0",
+    "version": 1,
+    "createdAt": "2025-11-12T04:48:45Z",
+    "updatedAt": "2025-11-12T04:48:45Z"
+  }
+]

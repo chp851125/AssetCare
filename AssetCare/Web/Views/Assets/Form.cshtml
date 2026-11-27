@@ -1,0 +1,177 @@
+@model AssetFormViewModel
+@{
+    var isNew = Model.Id is null;
+    ViewData["Title"] = isNew ? "新增資產" : $"編輯 {Model.AssetNo}";
+    var o = Model.Options;
+}
+<h1 class="h4 mb-3">@ViewData["Title"]</h1>
+
+<form asp-action="@(isNew ? "Create" : "Edit")" asp-route-id="@Model.Id" method="post" novalidate>
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <input type="hidden" asp-for="Version" />
+
+    <div class="card mb-3">
+        <div class="card-body row g-3">
+            <div class="col-md-6">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" maxlength="100" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="CategoryId" class="form-label"></label>
+                @if (isNew)
+                {
+                    <select asp-for="CategoryId" class="form-select" data-life-target="#UsefulLifeYears">
+                        <option value="">請選擇</option>
+                        @foreach (var c in o.Categories)
+                        {
+                            <option value="@c.Id" data-life="@c.DefaultUsefulLifeYears" selected="@(Model.CategoryId == c.Id)">@c.Name（@c.Code）</option>
+                        }
+                    </select>
+                    <div class="form-text">資產編號儲存時依類別自動配號。</div>
+                }
+                else
+                {
+                    <input type="hidden" asp-for="CategoryId" />
+                    <input class="form-control" value="@Model.AssetNo" disabled aria-label="資產編號" />
+                    <div class="form-text">類別已寫入資產編號，不可變更。</div>
+                }
+                <span asp-validation-for="CategoryId" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Status" class="form-label"></label>
+                @if (Model.StatusLocked)
+                {
+                    <input type="hidden" asp-for="Status" />
+                    <input class="form-control" value="@AssetStatus.UnderRepair.Label()" disabled />
+                    <div class="form-text">由報修工單控制。</div>
+                }
+                else
+                {
+                    <select asp-for="Status" class="form-select">
+                        <option value="@AssetStatus.InUse">@AssetStatus.InUse.Label()</option>
+                        <option value="@AssetStatus.Idle">@AssetStatus.Idle.Label()</option>
+                    </select>
+                }
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Brand" class="form-label"></label>
+                <input asp-for="Brand" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Model" class="form-label"></label>
+                <input asp-for="Model" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="SerialNo" class="form-label"></label>
+                <input asp-for="SerialNo" class="form-control" maxlength="80" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body row g-3">
+            <h2 class="h5 mb-0">購置與折舊</h2>
+            <div class="col-md-4">
+                <label asp-for="PurchaseDate" class="form-label"></label>
+                <input asp-for="PurchaseDate" type="date" class="form-control" max="@Clock.Today.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="PurchaseDate" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="PurchaseCost" class="form-label"></label>
+                <input asp-for="PurchaseCost" type="number" min="0" step="any" inputmode="decimal" class="form-control" />
+                <span asp-validation-for="PurchaseCost" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="SalvageValue" class="form-label"></label>
+                <input asp-for="SalvageValue" type="number" min="0" step="any" inputmode="decimal" class="form-control" />
+                <span asp-validation-for="SalvageValue" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="UsefulLifeYears" class="form-label"></label>
+                <input asp-for="UsefulLifeYears" type="number" min="1" max="100" inputmode="numeric" class="form-control" />
+                <span asp-validation-for="UsefulLifeYears" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="WarrantyEndDate" class="form-label"></label>
+                <input asp-for="WarrantyEndDate" type="date" class="form-control" />
+                <span asp-validation-for="WarrantyEndDate" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="VendorId" class="form-label"></label>
+                <select asp-for="VendorId" asp-items="o.Vendors.ToSelectList()" class="form-select">
+                    <option value="">無</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body row g-3">
+            <h2 class="h5 mb-0">位置與保管</h2>
+            @if (isNew)
+            {
+                <div class="col-md-4">
+                    <label asp-for="LocationId" class="form-label"></label>
+                    <select asp-for="LocationId" asp-items="o.Locations.ToSelectList()" class="form-select">
+                        <option value="">請選擇</option>
+                    </select>
+                    <span asp-validation-for="LocationId" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="DepartmentId" class="form-label"></label>
+                    <select asp-for="DepartmentId" asp-items="o.Departments.ToSelectList()" class="form-select">
+                        <option value="">無</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="CustodianUserId" class="form-label"></label>
+                    <select asp-for="CustodianUserId" asp-items="o.Users.ToSelectList()" class="form-select">
+                        <option value="">無</option>
+                    </select>
+                </div>
+            }
+            else
+            {
+                <input type="hidden" asp-for="LocationId" />
+                <input type="hidden" asp-for="DepartmentId" />
+                <input type="hidden" asp-for="CustodianUserId" />
+                <p class="text-secondary mb-0">地點、部門與保管人請使用<a asp-action="Transfer" asp-route-id="@Model.Id">轉移功能</a>變更，以保留紀錄。</p>
+            }
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body row g-3">
+            <div class="col-6 col-md-3">
+                <label asp-for="CurrentUsage" class="form-label"></label>
+                <input asp-for="CurrentUsage" type="number" min="0" step="any" inputmode="decimal" class="form-control" />
+                <span asp-validation-for="CurrentUsage" class="text-danger small"></span>
+            </div>
+            <div class="col-6 col-md-3">
+                <label asp-for="UsageUnit" class="form-label"></label>
+                <input asp-for="UsageUnit" class="form-control" maxlength="20" placeholder="例如：小時" />
+            </div>
+            <div class="col-12">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3" maxlength="1000"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-lg">儲存</button>
+        @if (isNew)
+        {
+            <a class="btn btn-outline-secondary btn-lg" asp-action="Index">取消</a>
+        }
+        else
+        {
+            <a class="btn btn-outline-secondary btn-lg" asp-action="Details" asp-route-id="@Model.Id">取消</a>
+        }
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

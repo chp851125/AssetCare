@@ -1,0 +1,42 @@
+[
+  {
+    "code": "IT",
+    "name": "資訊部",
+    "managerUserId": "eaa0e796-5102-ddbd-bf7b-18c2c28c1ae3",
+    "isActive": true,
+    "id": "d7cd05da-7831-3b40-0bbc-91ad2853b8bf",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  },
+  {
+    "code": "GA",
+    "name": "總務部",
+    "managerUserId": "6355a0c5-337d-0dc6-0717-ed33acc3610a",
+    "isActive": true,
+    "id": "0f310e22-b2ca-562a-9c45-2c221d425dcb",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  },
+  {
+    "code": "MFG",
+    "name": "製造部",
+    "managerUserId": "21fded95-b636-e165-e00f-d7f5136210e9",
+    "isActive": true,
+    "id": "f3a37ab9-fe39-6578-0032-707ba501ae45",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  },
+  {
+    "code": "RD",
+    "name": "研發部",
+    "managerUserId": null,
+    "isActive": true,
+    "id": "0b403282-db0d-28ba-da77-3bec4b1d1dc8",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  }
+]

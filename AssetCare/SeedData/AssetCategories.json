@@ -1,0 +1,57 @@
+[
+  {
+    "code": "AC",
+    "name": "空調",
+    "description": "分離式、箱型與機房精密空調",
+    "defaultUsefulLifeYears": 8,
+    "isActive": true,
+    "id": "939639ed-fd7b-c575-a718-8e47b99943cd",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  },
+  {
+    "code": "IT",
+    "name": "電腦周邊",
+    "description": "電腦、印表機、投影機與不斷電系統",
+    "defaultUsefulLifeYears": 4,
+    "isActive": true,
+    "id": "5adfdf5c-b39c-83b0-7e66-e7b981546a59",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  },
+  {
+    "code": "PE",
+    "name": "生產設備",
+    "description": "加工、包裝、動力與搬運設備",
+    "defaultUsefulLifeYears": 10,
+    "isActive": true,
+    "id": "7e00f93f-674a-939d-8233-f59c04f6e3f5",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  },
+  {
+    "code": "FS",
+    "name": "消防安全",
+    "description": "滅火、警報與消防泵浦設備",
+    "defaultUsefulLifeYears": 10,
+    "isActive": true,
+    "id": "1c8abd45-d382-3aa8-8913-151416bb4453",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  },
+  {
+    "code": "OF",
+    "name": "辦公家具",
+    "description": "辦公桌椅與會議室設備",
+    "defaultUsefulLifeYears": 5,
+    "isActive": true,
+    "id": "c00735ad-c598-f582-414b-d769bd147f88",
+    "version": 1,
+    "createdAt": "2025-10-23T04:48:45Z",
+    "updatedAt": "2025-10-23T04:48:45Z"
+  }
+]

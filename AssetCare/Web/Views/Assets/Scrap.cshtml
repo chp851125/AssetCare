@@ -1,0 +1,39 @@
+@model AssetScrapViewModel
+@{
+    ViewData["Title"] = $"報廢 {Model.Asset.AssetNo}";
+    var a = Model.Asset;
+}
+<h1 class="h4 mb-1">資產報廢</h1>
+<p class="text-secondary">@a.AssetNo @a.Name</p>
+
+@if (a.ActiveWorkOrderCount > 0)
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-1"></i>此資產尚有 @a.ActiveWorkOrderCount 張未結案工單，需先結案或取消才能報廢。
+    </div>
+    <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@a.Id">返回詳情</a>
+}
+else
+{
+    <div class="alert alert-danger">
+        報廢後<strong>無法復原</strong>：資產不可再編輯、轉移或開立工單，相關保養計畫會一併停用。
+    </div>
+    <form asp-action="Scrap" asp-route-id="@a.Id" method="post" class="card" novalidate
+          data-confirm="確定要報廢 @a.AssetNo @(a.Name)？此操作無法復原。" data-confirm-title="確認報廢">
+        <div class="card-body">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            <input type="hidden" asp-for="Version" />
+            <label asp-for="Reason" class="form-label"></label>
+            <textarea asp-for="Reason" class="form-control mb-1" rows="3" maxlength="500"></textarea>
+            <span asp-validation-for="Reason" class="text-danger small"></span>
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-danger btn-lg">報廢</button>
+                <a class="btn btn-outline-secondary btn-lg" asp-action="Details" asp-route-id="@a.Id">取消</a>
+            </div>
+        </div>
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

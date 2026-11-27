@@ -1,0 +1,250 @@
+@model AssetDetail
+@{
+    ViewData["Title"] = $"{Model.AssetNo} {Model.Name}";
+    var isManager = User.IsManager();
+    var isStaff = User.IsStaff();
+    var scrapped = Model.Status == AssetStatus.Scrapped;
+    var rules = (UploadRules)ViewData["UploadRules"]!;
+    string Date(DateOnly? value) => value?.ToString("yyyy/MM/dd") ?? "—";
+}
+
+<a class="d-inline-block mb-2" asp-action="Index"><i class="bi bi-chevron-left"></i> 資產清單</a>
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <div class="text-secondary">@Model.AssetNo</div>
+        <h1 class="h4 mb-1">@Model.Name</h1>
+        <span class="badge @Model.Status.BadgeClass()">@Model.Status.Label()</span>
+        <span class="badge @Model.Warranty.BadgeClass()">@Model.Warranty.Label()</span>
+    </div>
+    @if (isStaff)
+    {
+        <div class="d-flex flex-wrap gap-2">
+            @if (isManager && !scrapped)
+            {
+                <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Id"><i class="bi bi-pencil"></i> 編輯</a>
+                <a class="btn btn-outline-primary" asp-action="Transfer" asp-route-id="@Model.Id"><i class="bi bi-arrow-left-right"></i> 轉移</a>
+                <a class="btn btn-outline-danger" asp-action="Scrap" asp-route-id="@Model.Id"><i class="bi bi-trash3"></i> 報廢</a>
+            }
+            <a class="btn btn-outline-secondary" asp-action="Labels" asp-route-ids="@Model.Id"><i class="bi bi-qr-code"></i> 列印標籤</a>
+        </div>
+    }
+</div>
+
+@if (scrapped)
+{
+    <div class="alert alert-dark">
+        <i class="bi bi-slash-circle me-1"></i>本資產已於 @Clock.Format(Model.ScrappedAt) 報廢。原因：@Model.ScrapReason
+    </div>
+}
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">基本資料</h2>
+                <dl class="row detail-list mb-0">
+                    <dt class="col-4">類別</dt><dd class="col-8">@Model.CategoryName</dd>
+                    <dt class="col-4">廠牌</dt><dd class="col-8">@(Model.Brand ?? "—")</dd>
+                    <dt class="col-4">型號</dt><dd class="col-8">@(Model.Model ?? "—")</dd>
+                    <dt class="col-4">序號</dt><dd class="col-8">@(Model.SerialNo ?? "—")</dd>
+                    <dt class="col-4">廠商</dt>
+                    <dd class="col-8">
+                        @(Model.VendorName ?? "—")
+                        @if (Model.VendorPhone is not null) { <a class="d-block" href="tel:@Model.VendorPhone">@Model.VendorPhone</a> }
+                    </dd>
+                    @if (Model.UsageUnit is not null || Model.CurrentUsage is not null)
+                    {
+                        <dt class="col-4">使用量</dt><dd class="col-8">@(Model.CurrentUsage?.ToString("N0") ?? "—") @Model.UsageUnit</dd>
+                    }
+                    <dt class="col-4">說明</dt><dd class="col-8 pre-line">@(Model.Description ?? "—")</dd>
+                </dl>
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-6">
+        <section class="card mb-3">
+            <div class="card-body">
+                <h2 class="h5">位置與保管</h2>
+                <dl class="row detail-list mb-0">
+                    <dt class="col-4">地點</dt><dd class="col-8">@Model.LocationPath</dd>
+                    <dt class="col-4">部門</dt><dd class="col-8">@(Model.DepartmentName ?? "—")</dd>
+                    <dt class="col-4">保管人</dt><dd class="col-8">@(Model.CustodianName ?? "—")</dd>
+                </dl>
+            </div>
+        </section>
+        <section class="card">
+            <div class="card-body">
+                <h2 class="h5">保固@(Model.Finance is null ? "" : "與折舊")</h2>
+                <dl class="row detail-list mb-0">
+                    <dt class="col-4">購入日期</dt><dd class="col-8">@Date(Model.PurchaseDate)</dd>
+                    <dt class="col-4">保固到期</dt>
+                    <dd class="col-8">
+                        @Date(Model.WarrantyEndDate)
+                        @if (Model.WarrantyDaysLeft is { } days && !scrapped)
+                        {
+                            <span class="small @(days < 0 ? "text-danger" : "text-secondary")">（@(days < 0 ? $"已過期 {-days} 天" : $"剩 {days} 天")）</span>
+                        }
+                    </dd>
+                    @if (Model.Finance is { } f)
+                    {
+                        <dt class="col-4">購入成本</dt><dd class="col-8">NT$ @f.PurchaseCost.ToString("N0")</dd>
+                        <dt class="col-4">殘值</dt><dd class="col-8">NT$ @f.SalvageValue.ToString("N0")</dd>
+                        <dt class="col-4">耐用年限</dt><dd class="col-8">@f.UsefulLifeYears 年（已折舊 @f.Depreciation.ElapsedMonths / @f.Depreciation.TotalMonths 個月）</dd>
+                        <dt class="col-4">每月折舊</dt><dd class="col-8">約 NT$ @f.Depreciation.MonthlyAmount.ToString("N0")</dd>
+                        <dt class="col-4">累計折舊</dt><dd class="col-8">NT$ @f.Depreciation.AccumulatedAmount.ToString("N0")</dd>
+                        <dt class="col-4">帳面價值</dt>
+                        <dd class="col-8">
+                            <strong class="fs-5">NT$ @f.Depreciation.BookValue.ToString("N0")</strong>
+                            <div class="small text-secondary">直線法，計算至 @Date(f.AsOf)@(scrapped ? "（報廢日）" : "")</div>
+                        </dd>
+                    }
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-12">
+        <section class="card">
+            <div class="card-body">
+                <h2 class="h5">@(isStaff ? "維修歷史" : "我的報修紀錄")</h2>
+                @if (Model.WorkOrders.Count == 0)
+                {
+                    <p class="text-secondary mb-0">尚無工單紀錄。</p>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var w in Model.WorkOrders)
+                        {
+                            <li class="list-group-item px-0">
+                                <div class="d-flex justify-content-between gap-2">
+                                    <span class="small text-secondary">@w.OrderNo・@w.Type.Label()・@w.Priority.Label()</span>
+                                    <span class="badge align-self-start @w.Status.BadgeClass()">@w.Status.Label()</span>
+                                </div>
+                                <div>@w.Title</div>
+                                <div class="small text-secondary">@Clock.Format(w.CreatedAt)・負責人：@(w.AssigneeName ?? "未指派")</div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </section>
+    </div>
+
+    <div class="col-12">
+        <section class="card">
+            <div class="card-body">
+                <h2 class="h5">保養計畫</h2>
+                @if (Model.Plans.Count == 0)
+                {
+                    <p class="text-secondary mb-0">尚未設定保養計畫。</p>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var p in Model.Plans)
+                        {
+                            <li class="list-group-item px-0">
+                                <div class="d-flex justify-content-between gap-2">
+                                    <span>@p.Name</span>
+                                    <span class="text-nowrap">
+                                        @if (!p.IsActive) { <span class="badge text-bg-secondary">停用</span> }
+                                        @if (p.IsOverdue) { <span class="badge text-bg-danger">逾期</span> }
+                                    </span>
+                                </div>
+                                <div class="small text-secondary">
+                                    @p.Cycle.Label()・下次：@(p.NextDueUsage is { } usage ? $"使用量 {usage:N0}" : Date(p.NextDueDate))・上次完成：@Date(p.LastCompletedDate)・負責人：@(p.AssigneeName ?? "未指派")
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </section>
+    </div>
+
+    @if (isStaff)
+    {
+        <div class="col-12">
+            <section class="card">
+                <div class="card-body">
+                    <h2 class="h5">轉移紀錄</h2>
+                    @if (Model.Transfers.Count == 0)
+                    {
+                        <p class="text-secondary mb-0">尚無轉移紀錄。</p>
+                    }
+                    else
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var t in Model.Transfers)
+                            {
+                                <li class="list-group-item px-0">
+                                    <div class="small text-secondary">@Clock.Format(t.TransferredAt)・經辦：@t.ByName</div>
+                                    <div>@t.FromText <i class="bi bi-arrow-right mx-1" aria-label="轉移至"></i> @t.ToText</div>
+                                    <div class="small">原因：@t.Reason</div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </section>
+        </div>
+
+        <div class="col-12" id="attachments">
+            <section class="card">
+                <div class="card-body">
+                    <h2 class="h5">附件</h2>
+                    @if (Model.Attachments.Count == 0)
+                    {
+                        <p class="text-secondary">尚無附件。</p>
+                    }
+                    <div class="row g-2 mb-3">
+                        @foreach (var file in Model.Attachments)
+                        {
+                            <div class="col-6 col-md-4 col-xl-3">
+                                <div class="card h-100">
+                                    <a asp-controller="Attachments" asp-action="Download" asp-route-id="@file.Id" target="_blank" rel="noopener">
+                                        @if (file.IsImage)
+                                        {
+                                            <img class="card-img-top attachment-thumb" alt="@(file.Caption ?? file.FileName)"
+                                                 src="@Url.Action("Download", "Attachments", new { id = file.Id })" loading="lazy" />
+                                        }
+                                        else
+                                        {
+                                            <div class="attachment-thumb d-flex align-items-center justify-content-center"><i class="bi bi-file-earmark-text display-5"></i></div>
+                                        }
+                                    </a>
+                                    <div class="card-body p-2 small">
+                                        <div class="text-break fw-semibold">@file.FileName</div>
+                                        @if (file.Caption is not null) { <div>@file.Caption</div> }
+                                        <div class="text-secondary">@((file.SizeBytes / 1024.0).ToString("N0")) KB・@file.UploadedByName</div>
+                                        <div class="text-secondary">@Clock.Format(file.UploadedAt)</div>
+                                        @if (file.CanDelete)
+                                        {
+                                            <form asp-controller="Attachments" asp-action="Delete" asp-route-id="@file.Id" method="post" data-confirm="確定要刪除附件「@file.FileName」？">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger mt-1"><i class="bi bi-trash"></i> 刪除</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <form asp-controller="Attachments" asp-action="UploadForAsset" method="post" enctype="multipart/form-data" class="row g-2">
+                        <input type="hidden" name="assetId" value="@Model.Id" />
+                        <div class="col-md-5">
+                            <input type="file" class="form-control" name="files" multiple required accept="@string.Join(",", rules.Extensions)" aria-label="選擇檔案" />
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" name="caption" maxlength="200" placeholder="說明（選填）" aria-label="附件說明" />
+                        </div>
+                        <div class="col-md-2 d-grid">
+                            <button type="submit" class="btn btn-outline-primary"><i class="bi bi-upload"></i> 上傳</button>
+                        </div>
+                        <div class="form-text">一次最多 5 個檔案，單檔上限 @rules.MaxSizeMb MB；允許 @string.Join("、", rules.Extensions)。</div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    }
+</div>

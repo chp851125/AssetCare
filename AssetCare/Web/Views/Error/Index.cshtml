@@ -1,0 +1,21 @@
+@model ErrorViewModel
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.Title - AssetCare</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <main class="container empty-state">
+        <div class="display-4 text-secondary">@Model.StatusCode</div>
+        <h1 class="h4">@Model.Title</h1>
+        <p class="text-secondary">@Model.Message</p>
+        <p class="small text-secondary">追蹤碼：@Model.RequestId</p>
+        <a class="btn btn-primary" href="~/">回首頁</a>
+    </main>
+</body>
+</html>

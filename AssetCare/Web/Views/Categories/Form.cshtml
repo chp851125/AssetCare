@@ -1,0 +1,47 @@
+@model CategoryFormViewModel
+@{
+    var isNew = Model.Id is null;
+    ViewData["Title"] = isNew ? "新增資產類別" : "編輯資產類別";
+}
+<h1 class="h4 mb-3">@ViewData["Title"]</h1>
+<form asp-action="@(isNew ? "Create" : "Edit")" asp-route-id="@Model.Id" method="post" class="card" novalidate>
+    <div class="card-body row g-3">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <input type="hidden" asp-for="Version" />
+        <div class="col-md-3">
+            <label asp-for="Code" class="form-label"></label>
+            <input asp-for="Code" class="form-control text-uppercase" maxlength="6" readonly="@Model.CodeLocked" />
+            <div class="form-text">@(Model.CodeLocked ? "已有資產使用，不可變更。" : "用於資產編號 AST-代碼-0001。")</div>
+            <span asp-validation-for="Code" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" maxlength="50" />
+            <span asp-validation-for="Name" class="text-danger small"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="DefaultUsefulLifeYears" class="form-label"></label>
+            <input asp-for="DefaultUsefulLifeYears" type="number" min="1" max="100" class="form-control" />
+            <span asp-validation-for="DefaultUsefulLifeYears" class="text-danger small"></span>
+        </div>
+        <div class="col-12">
+            <label asp-for="Description" class="form-label"></label>
+            <input asp-for="Description" class="form-control" maxlength="200" />
+        </div>
+        <div class="col-12">
+            <div class="form-check form-switch">
+                <input asp-for="IsActive" class="form-check-input" />
+                <label asp-for="IsActive" class="form-check-label"></label>
+            </div>
+            <div class="form-text">停用後不可用於新增資產，既有資產不受影響。</div>
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">儲存</button>
+            <a class="btn btn-outline-secondary btn-lg" asp-action="Index">取消</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

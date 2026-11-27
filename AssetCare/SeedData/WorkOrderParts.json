@@ -1,0 +1,74 @@
+[
+  {
+    "workOrderId": "79753c73-dd44-cbcd-1b50-5dbbbb94ecb8",
+    "partId": "77dfb90f-9b9c-201f-0080-69c669afaff7",
+    "quantity": 1,
+    "unitCost": 420,
+    "issuedByUserId": "bf9d5007-3fc6-f9d4-c5a1-b983fa9881ed",
+    "issuedAt": "2026-10-03T12:49:58Z",
+    "id": "215b9d8d-0b39-bf89-af36-63efa883f98e",
+    "version": 1,
+    "createdAt": "2026-10-03T12:49:58Z",
+    "updatedAt": "2026-10-03T12:49:58Z"
+  },
+  {
+    "workOrderId": "fca2b32c-29a0-bbec-d726-29c4eaa2fa31",
+    "partId": "593030d9-2887-496a-b4bc-11d0dc98e68f",
+    "quantity": 2,
+    "unitCost": 180,
+    "issuedByUserId": "bf9d5007-3fc6-f9d4-c5a1-b983fa9881ed",
+    "issuedAt": "2026-11-03T16:49:41Z",
+    "id": "f7c49ebf-cb35-2a43-a43c-3106cdfcaa5d",
+    "version": 1,
+    "createdAt": "2026-11-03T16:49:41Z",
+    "updatedAt": "2026-11-03T16:49:41Z"
+  },
+  {
+    "workOrderId": "48f0f691-1c66-70a7-2d21-f4f93526b589",
+    "partId": "593030d9-2887-496a-b4bc-11d0dc98e68f",
+    "quantity": 4,
+    "unitCost": 180,
+    "issuedByUserId": "bf9d5007-3fc6-f9d4-c5a1-b983fa9881ed",
+    "issuedAt": "2026-11-07T09:50:43Z",
+    "id": "8919f039-4c24-73ae-256e-81f4b0d76735",
+    "version": 1,
+    "createdAt": "2026-11-07T09:50:43Z",
+    "updatedAt": "2026-11-07T09:50:43Z"
+  },
+  {
+    "workOrderId": "800ed91a-3bc3-4ae6-d751-14fd15cad9ca",
+    "partId": "25471a0c-5409-5588-86ab-b3061476dd51",
+    "quantity": 2,
+    "unitCost": 890,
+    "issuedByUserId": "afa4b9b5-beaa-8028-31ae-db5293ffb73e",
+    "issuedAt": "2026-11-26T01:52:24Z",
+    "id": "a36db621-0152-467a-266d-0fb5a4be30ec",
+    "version": 1,
+    "createdAt": "2026-11-26T01:52:24Z",
+    "updatedAt": "2026-11-26T01:52:24Z"
+  },
+  {
+    "workOrderId": "8ac33550-74ea-8add-b54b-85df1c188345",
+    "partId": "7795d9a8-ced9-3c30-bd50-82f7612c7420",
+    "quantity": 1,
+    "unitCost": 3600,
+    "issuedByUserId": "c3ed4ade-51c4-7c23-9697-dbfe9115f87a",
+    "issuedAt": "2026-11-25T17:52:29Z",
+    "id": "9a969adb-6af1-aaba-e562-6e2226fc38c6",
+    "version": 1,
+    "createdAt": "2026-11-25T17:52:29Z",
+    "updatedAt": "2026-11-25T17:52:29Z"
+  },
+  {
+    "workOrderId": "10e22377-e65c-9060-f8bb-ed8ae6b96c18",
+    "partId": "77dfb90f-9b9c-201f-0080-69c669afaff7",
+    "quantity": 2,
+    "unitCost": 420,
+    "issuedByUserId": "bf9d5007-3fc6-f9d4-c5a1-b983fa9881ed",
+    "issuedAt": "2026-11-26T04:50:53Z",
+    "id": "f539b452-e619-120d-e050-7ac4c3a9e1ae",
+    "version": 1,
+    "createdAt": "2026-11-26T04:50:53Z",
+    "updatedAt": "2026-11-26T04:50:53Z"
+  }
+]

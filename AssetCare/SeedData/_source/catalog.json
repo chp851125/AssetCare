@@ -1,0 +1,324 @@
+{
+  "demoPassword": "Demo@2026!",
+  "emailDomain": "assetcare.example",
+  "departments": [
+    { "key": "IT", "name": "資訊部", "manager": "admin" },
+    { "key": "GA", "name": "總務部", "manager": "lin.meiling" },
+    { "key": "MFG", "name": "製造部", "manager": "wang.jianhong" },
+    { "key": "RD", "name": "研發部", "manager": null }
+  ],
+  "users": [
+    { "key": "admin", "name": "陳柏宇", "role": "Admin", "dept": "IT", "phone": "02-2788-1100#101" },
+    { "key": "lin.meiling", "name": "林美玲", "role": "Supervisor", "dept": "GA", "phone": "02-2788-1100#201" },
+    { "key": "wang.jianhong", "name": "王建宏", "role": "Supervisor", "dept": "MFG", "phone": "03-327-5500#301" },
+    { "key": "chang.zhiwei", "name": "張志偉", "role": "Technician", "dept": "GA", "phone": "0912-345-118" },
+    { "key": "huang.junjie", "name": "黃俊傑", "role": "Technician", "dept": "MFG", "phone": "0928-771-406" },
+    { "key": "liu.yating", "name": "劉雅婷", "role": "Technician", "dept": "IT", "phone": "0936-208-554" },
+    { "key": "wu.shufen", "name": "吳淑芬", "role": "Requester", "dept": "GA", "phone": "02-2788-1100#215" },
+    { "key": "tsai.minghui", "name": "蔡明輝", "role": "Requester", "dept": "MFG", "phone": "03-327-5500#318" },
+    { "key": "hsu.peiyu", "name": "許珮瑜", "role": "Requester", "dept": "RD", "phone": "02-2788-1100#332" },
+    { "key": "cheng.wenxiong", "name": "鄭文雄", "role": "Requester", "dept": "MFG", "phone": "03-327-5500#322", "disabled": true }
+  ],
+  "locations": [
+    { "key": "HQ", "name": "台北總部大樓", "parent": null },
+    { "key": "HQ-2F", "name": "總部 2F 行政辦公區", "parent": "HQ" },
+    { "key": "HQ-3F", "name": "總部 3F 研發辦公區", "parent": "HQ" },
+    { "key": "HQ-3F-SR", "name": "3F 資訊機房", "parent": "HQ-3F" },
+    { "key": "LK", "name": "林口廠", "parent": null },
+    { "key": "LK-1F", "name": "林口廠 1F 生產區", "parent": "LK" }
+  ],
+  "categories": [
+    { "key": "AC", "name": "空調", "life": 8, "description": "分離式、箱型與機房精密空調" },
+    { "key": "IT", "name": "電腦周邊", "life": 4, "description": "電腦、印表機、投影機與不斷電系統" },
+    { "key": "PE", "name": "生產設備", "life": 10, "description": "加工、包裝、動力與搬運設備" },
+    { "key": "FS", "name": "消防安全", "life": 10, "description": "滅火、警報與消防泵浦設備" },
+    { "key": "OF", "name": "辦公家具", "life": 5, "description": "辦公桌椅與會議室設備" }
+  ],
+  "vendors": [
+    { "key": "cool", "name": "冠宇空調工程有限公司", "taxId": "24567813", "contact": "李國源", "phone": "02-2999-3180", "address": "新北市三重區重新路五段 609 號", "scope": "空調安裝、保養與冷媒回收" },
+    { "key": "info", "name": "宏碩資訊服務股份有限公司", "taxId": "53921046", "contact": "周怡君", "phone": "02-8751-6622", "address": "台北市內湖區瑞光路 188 號 6 樓", "scope": "電腦硬體、印表機與 UPS 維修" },
+    { "key": "mach", "name": "晟陽精密機械有限公司", "taxId": "70384219", "contact": "邱政達", "phone": "03-318-4477", "address": "桃園市龜山區文化二路 31 號", "scope": "CNC 加工機、空壓機與包裝機維修" },
+    { "key": "fire", "name": "安固消防科技股份有限公司", "taxId": "16750382", "contact": "何佩珊", "phone": "02-2268-9051", "address": "新北市土城區中央路二段 96 號", "scope": "消防系統檢修申報與藥劑填充" },
+    { "key": "office", "name": "品誠辦公家具行", "taxId": "38105627", "contact": "謝宗翰", "phone": "02-2557-7340", "address": "台北市大同區承德路二段 75 號", "scope": "辦公家具與會議室設備" }
+  ],
+  "assets": [
+    { "key": "AC1", "category": "AC", "name": "3F 辦公區分離式變頻冷氣", "brand": "大金", "model": "FTXM71", "location": "HQ-3F", "dept": "RD", "custodian": "hsu.peiyu", "vendor": "cool", "cost": 86000, "ageMonths": 28, "warranty": "active" },
+    { "key": "AC2", "category": "AC", "name": "機房精密空調主機", "brand": "Vertiv", "model": "PEX2020", "location": "HQ-3F-SR", "dept": "IT", "custodian": "liu.yating", "vendor": "cool", "cost": 465000, "ageMonths": 31, "warranty": "active" },
+    { "key": "AC3", "category": "AC", "name": "生產區落地箱型冷氣", "brand": "日立", "model": "RP-160K", "location": "LK-1F", "dept": "MFG", "custodian": "tsai.minghui", "vendor": "cool", "cost": 138000, "ageMonths": 52, "warranty": "none" },
+    { "key": "AC4", "category": "AC", "name": "大廳吸頂式冷氣", "brand": "國際牌", "model": "CS-J90", "location": "HQ", "dept": "GA", "custodian": "wu.shufen", "vendor": "cool", "cost": 72000, "ageMonths": 62, "warranty": "expired", "warrantyOffsetDays": -200 },
+    { "key": "IT1", "category": "IT", "name": "研發部行動工作站筆電", "brand": "Lenovo", "model": "ThinkPad P16", "location": "HQ-3F", "dept": "RD", "custodian": "hsu.peiyu", "vendor": "info", "cost": 78500, "ageMonths": 17, "warranty": "active" },
+    { "key": "IT2", "category": "IT", "name": "2F 彩色雷射多功能印表機", "brand": "Fujifilm", "model": "Apeos C3570", "location": "HQ-2F", "dept": "GA", "custodian": "wu.shufen", "vendor": "info", "cost": 112000, "ageMonths": 35, "warranty": "expiring", "warrantyOffsetDays": 12 },
+    { "key": "IT3", "category": "IT", "name": "機房 10kVA 不斷電系統", "brand": "APC", "model": "SRT10K", "location": "HQ-3F-SR", "dept": "IT", "custodian": "liu.yating", "vendor": "info", "cost": 158000, "ageMonths": 22, "warranty": "active" },
+    { "key": "IT4", "category": "IT", "name": "舊款會議室投影機", "brand": "Epson", "model": "EB-X05", "location": "HQ-2F", "dept": "GA", "custodian": null, "vendor": "info", "cost": 21900, "ageMonths": 74, "warranty": "none", "state": "scrapped", "scrappedDaysAgo": 45, "scrapReason": "燈泡與主機板老化，維修報價高於殘值" },
+    { "key": "PE1", "category": "PE", "name": "CNC 立式加工中心機", "brand": "台中精機", "model": "Vcenter-85", "location": "LK-1F", "dept": "MFG", "custodian": "tsai.minghui", "vendor": "mach", "cost": 2850000, "ageMonths": 40, "warranty": "active", "usageUnit": "小時", "currentUsage": 7420 },
+    { "key": "PE2", "category": "PE", "name": "螺旋式空氣壓縮機", "brand": "復盛", "model": "SA-37A", "location": "LK-1F", "dept": "MFG", "custodian": "tsai.minghui", "vendor": "mach", "cost": 420000, "ageMonths": 33, "warranty": "active", "usageUnit": "小時", "currentUsage": 11860 },
+    { "key": "PE3", "category": "PE", "name": "自動折蓋封箱機", "brand": "世霖", "model": "AS-523", "location": "LK-1F", "dept": "MFG", "custodian": "tsai.minghui", "vendor": "mach", "cost": 135000, "ageMonths": 20, "warranty": "active" },
+    { "key": "PE4", "category": "PE", "name": "電動堆高機 2.5 噸", "brand": "Toyota", "model": "8FBE25", "location": "LK", "dept": "MFG", "custodian": "wang.jianhong", "vendor": "mach", "cost": 760000, "ageMonths": 58, "warranty": "expired", "warrantyOffsetDays": -40 },
+    { "key": "FS1", "category": "FS", "name": "機房 FM-200 氣體滅火系統", "brand": "Kidde", "model": "ADS-FM200", "location": "HQ-3F-SR", "dept": "IT", "custodian": "admin", "vendor": "fire", "cost": 385000, "ageMonths": 30, "warranty": "active" },
+    { "key": "FS2", "category": "FS", "name": "總部火警受信總機", "brand": "能美", "model": "FAP-128", "location": "HQ", "dept": "GA", "custodian": "lin.meiling", "vendor": "fire", "cost": 198000, "ageMonths": 35, "warranty": "expiring", "warrantyOffsetDays": 25 },
+    { "key": "FS3", "category": "FS", "name": "廠區消防加壓泵浦", "brand": "川源", "model": "KTP-50", "location": "LK", "dept": "MFG", "custodian": "wang.jianhong", "vendor": "fire", "cost": 245000, "ageMonths": 46, "warranty": "none" },
+    { "key": "FS4", "category": "FS", "name": "生產區乾粉滅火器組（12 支）", "brand": "正德", "model": "ABC-10P", "location": "LK-1F", "dept": "MFG", "custodian": "wang.jianhong", "vendor": "fire", "cost": 18600, "ageMonths": 14, "warranty": "active" },
+    { "key": "OF1", "category": "OF", "name": "電動升降辦公桌", "brand": "FUNTE", "model": "DT-160", "location": "HQ-3F", "dept": "RD", "custodian": "hsu.peiyu", "vendor": "office", "cost": 14800, "ageMonths": 11, "warranty": "active" },
+    { "key": "OF2", "category": "OF", "name": "大會議室電動投影布幕", "brand": "Grandview", "model": "CB-MP120", "location": "HQ-2F", "dept": "GA", "custodian": "wu.shufen", "vendor": "office", "cost": 16500, "ageMonths": 26, "warranty": "active", "state": "idle" },
+    { "key": "OF3", "category": "OF", "name": "舊式主管辦公椅", "brand": "優美", "model": "UM-820", "location": "HQ-2F", "dept": "GA", "custodian": null, "vendor": "office", "cost": 8900, "ageMonths": 80, "warranty": "none", "state": "scrapped", "scrappedDaysAgo": 90, "scrapReason": "氣壓棒損壞且椅背斷裂，已超過耐用年限" },
+    { "key": "OF4", "category": "OF", "name": "十二人會議桌", "brand": "震旦", "model": "AU-CT360", "location": "HQ-2F", "dept": "GA", "custodian": "wu.shufen", "vendor": "office", "cost": 46000, "ageMonths": 38, "warranty": "none", "state": "idle" }
+  ],
+  "transfers": [
+    { "asset": "IT1", "fromLocation": "HQ-2F", "fromDept": "IT", "fromCustodian": "liu.yating", "reason": "新進研發人員配發使用", "by": "lin.meiling", "daysAgo": 120 },
+    { "asset": "PE4", "fromLocation": "LK-1F", "fromDept": "MFG", "fromCustodian": "tsai.minghui", "reason": "堆高機改停放廠區裝卸碼頭並由主管列管", "by": "wang.jianhong", "daysAgo": 75 },
+    { "asset": "OF2", "fromLocation": "HQ-3F", "fromDept": "RD", "fromCustodian": "hsu.peiyu", "reason": "會議室改裝，布幕移至 2F 暫存", "by": "lin.meiling", "daysAgo": 33 },
+    { "asset": "AC4", "fromLocation": "HQ", "fromDept": "GA", "fromCustodian": "lin.meiling", "reason": "總務業務交接，保管人變更", "by": "lin.meiling", "daysAgo": 150 }
+  ],
+  "parts": [
+    { "key": "P01", "name": "冷氣初效濾網", "spec": "600×600×20mm", "unit": "片", "cost": 180, "safety": 10, "stock": 24, "vendor": "cool", "shelf": "總部倉庫 A-01" },
+    { "key": "P02", "name": "R410A 冷媒", "spec": "10kg 鋼瓶裝（以公斤領用）", "unit": "公斤", "cost": 420, "safety": 5, "stock": 14, "vendor": "cool", "shelf": "總部倉庫 A-02" },
+    { "key": "P03", "name": "UPS 密閉式鉛酸電池", "spec": "12V 9Ah", "unit": "顆", "cost": 650, "safety": 8, "stock": 16, "vendor": "info", "shelf": "機房備品櫃" },
+    { "key": "P04", "name": "彩色印表機碳粉匣（黑）", "spec": "Apeos C 系列", "unit": "支", "cost": 2350, "safety": 3, "stock": 8, "vendor": "info", "shelf": "總部倉庫 B-03" },
+    { "key": "P05", "name": "印表機取紙滾輪組", "spec": "Apeos C 系列", "unit": "組", "cost": 890, "safety": 2, "stock": 4, "vendor": "info", "shelf": "總部倉庫 B-04" },
+    { "key": "P06", "name": "CNC 主軸傳動皮帶", "spec": "8YU-1040", "unit": "條", "cost": 3600, "safety": 3, "stock": 1, "vendor": "mach", "shelf": "林口料架 C-11" },
+    { "key": "P07", "name": "空壓機空氣濾清器", "spec": "SA-37 適用", "unit": "個", "cost": 1250, "safety": 2, "stock": 6, "vendor": "mach", "shelf": "林口料架 C-12" },
+    { "key": "P08", "name": "消防泵機械軸封", "spec": "軸徑 35mm", "unit": "組", "cost": 2800, "safety": 2, "stock": 1, "vendor": "fire", "shelf": "林口料架 D-02" },
+    { "key": "P09", "name": "封箱機切刀片", "spec": "AS-523 原廠", "unit": "片", "cost": 150, "safety": 6, "stock": 15, "vendor": "mach", "shelf": "林口料架 C-15" },
+    { "key": "P10", "name": "筆電原廠電池", "spec": "ThinkPad P16 94Wh", "unit": "顆", "cost": 4200, "safety": 1, "stock": 2, "vendor": "info", "shelf": "資訊部備品櫃" }
+  ],
+  "stockIns": [
+    { "part": "P01", "qty": 20, "daysAgo": 45, "by": "chang.zhiwei", "note": "季度採購到貨" },
+    { "part": "P04", "qty": 6, "daysAgo": 30, "by": "liu.yating", "note": "碳粉匣補貨" },
+    { "part": "P07", "qty": 4, "daysAgo": 12, "by": "huang.junjie", "note": "空壓機保養耗材到貨" },
+    { "part": "P09", "qty": 10, "daysAgo": 5, "by": "huang.junjie", "note": "刀片安全庫存補充" }
+  ],
+  "plans": [
+    { "key": "daily", "name": "機房精密空調每日巡檢", "asset": "AC2", "cycle": "Daily", "leadDays": 0, "dueOffsetDays": 0, "lastOffsetDays": -1, "assignee": "liu.yating", "priority": "Normal", "checklist": ["記錄回風溫度與濕度", "確認面板無告警", "檢查排水管無漏水"] },
+    { "key": "weekly", "name": "不斷電系統每週檢查", "asset": "IT3", "cycle": "Weekly", "leadDays": 3, "dueOffsetDays": 2, "lastOffsetDays": -5, "assignee": "liu.yating", "priority": "Normal", "checklist": ["確認負載率低於 80%", "檢查電池健康狀態", "清潔進風口", "查看事件紀錄"] },
+    { "key": "monthly", "name": "空氣壓縮機月保養", "asset": "PE2", "cycle": "Monthly", "leadDays": 7, "dueOffsetDays": -6, "lastOffsetDays": -36, "assignee": "huang.junjie", "priority": "Normal", "checklist": ["清潔或更換空氣濾清器", "檢查潤滑油位", "排放儲氣桶積水", "檢查皮帶張力"] },
+    { "key": "quarterly", "name": "堆高機季保養", "asset": "PE4", "cycle": "Quarterly", "leadDays": 14, "dueOffsetDays": -18, "lastOffsetDays": -108, "assignee": "huang.junjie", "priority": "High", "checklist": ["檢查煞車與轉向", "檢查油壓缸與鏈條", "電瓶液位與接頭清潔", "警示燈與喇叭測試"] },
+    { "key": "yearly", "name": "火警受信總機年度檢修", "asset": "FS2", "cycle": "Yearly", "leadDays": 14, "dueOffsetDays": -20, "assignee": "chang.zhiwei", "priority": "High", "checklist": ["各迴路動作測試", "備用電源放電測試", "探測器抽樣測試", "製作檢修紀錄表"] },
+    { "key": "usage", "name": "CNC 主軸每 2000 小時保養", "asset": "PE1", "cycle": "ByUsage", "leadDays": 0, "usageInterval": 2000, "nextDueUsage": 8000, "assignee": "huang.junjie", "priority": "Normal", "checklist": ["主軸振動值量測", "更換潤滑油", "檢查傳動皮帶", "精度校正確認"] }
+  ],
+  "workOrders": [
+    { "key": "W01", "asset": "AC1", "priority": "Normal", "requester": "hsu.peiyu", "createdHoursAgo": 3,
+      "title": "冷氣出風有霉味", "description": "開機後出風口有明顯霉味，靠窗座位同仁反映喉嚨不適。", "steps": [] },
+    { "key": "W02", "asset": "PE3", "priority": "Low", "requester": "tsai.minghui", "createdHoursAgo": 6,
+      "title": "封箱機膠帶偶爾切不斷", "description": "約每二十箱會有一箱膠帶拖尾，需要人工剪除。", "steps": [] },
+    { "key": "W03", "asset": "IT1", "priority": "High", "requester": "hsu.peiyu", "createdHoursAgo": 2,
+      "title": "筆電接擴充座後螢幕無畫面", "description": "今天早上接上擴充座後兩台外接螢幕都沒有訊號，重開機無效。",
+      "steps": [ { "do": "assign", "at": 0.5, "by": "lin.meiling", "to": "liu.yating" } ] },
+    { "key": "W04", "asset": "PE2", "priority": "Normal", "requester": "tsai.minghui", "createdHoursAgo": 5,
+      "title": "空壓機運轉聲音異常", "description": "加載時有規律的敲擊聲，聲音比平常大很多。",
+      "steps": [ { "do": "accept", "at": 1.5, "by": "huang.junjie" } ] },
+    { "key": "W05", "asset": "AC3", "priority": "Normal", "requester": "tsai.minghui", "createdHoursAgo": 30,
+      "title": "生產區冷氣不冷", "description": "下午室溫升到 31 度，冷氣持續運轉但出風不冷。",
+      "steps": [
+        { "do": "assign", "at": 2, "by": "wang.jianhong", "to": "chang.zhiwei" },
+        { "do": "start", "at": 5, "by": "chang.zhiwei" },
+        { "do": "comment", "at": 6, "by": "chang.zhiwei", "note": "初步量測高壓偏低，明天攜帶檢漏儀確認銅管接頭。" }
+      ] },
+    { "key": "W06", "asset": "IT2", "priority": "Low", "requester": "wu.shufen", "createdHoursAgo": 50,
+      "title": "印表機經常卡紙", "description": "第二紙匣取紙時常一次吸兩張，造成卡紙。",
+      "steps": [
+        { "do": "assign", "at": 4, "by": "lin.meiling", "to": "liu.yating" },
+        { "do": "start", "at": 22, "by": "liu.yating" },
+        { "do": "issue", "at": 23, "by": "liu.yating", "part": "P05", "qty": 2 }
+      ] },
+    { "key": "W07", "asset": "PE1", "priority": "Normal", "requester": "tsai.minghui", "createdHoursAgo": 40,
+      "title": "CNC 主軸高轉速時異音", "description": "主軸超過 6000 rpm 時出現尖銳異音，加工面粗糙度變差。",
+      "steps": [
+        { "do": "assign", "at": 1, "by": "wang.jianhong", "to": "huang.junjie" },
+        { "do": "start", "at": 3, "by": "huang.junjie" },
+        { "do": "issue", "at": 5, "by": "huang.junjie", "part": "P06", "qty": 1 },
+        { "do": "wait", "at": 6, "by": "huang.junjie", "note": "皮帶更換後仍有異音，需向原廠訂購主軸軸承。" }
+      ] },
+    { "key": "W08", "asset": "FS3", "priority": "Low", "requester": "wang.jianhong", "createdHoursAgo": 70,
+      "title": "消防泵浦軸封滲水", "description": "例行巡檢發現泵浦軸心下方有持續滴水。",
+      "steps": [
+        { "do": "assign", "at": 5, "by": "wang.jianhong", "to": "chang.zhiwei" },
+        { "do": "start", "at": 24, "by": "chang.zhiwei" },
+        { "do": "sendout", "at": 27, "by": "chang.zhiwei", "vendor": "fire", "returnInDays": 5, "note": "泵浦拆下送廠商更換軸封與校正軸心。" },
+        { "do": "wait", "at": 28, "by": "chang.zhiwei", "note": "等待廠商送回。" }
+      ] },
+    { "key": "W09", "asset": "AC2", "priority": "Normal", "requester": "admin", "createdHoursAgo": 28,
+      "title": "機房空調低壓告警", "description": "精密空調面板出現低壓告警，每隔約一小時復歸一次。",
+      "cause": "冷媒管接頭微漏造成冷媒不足", "resolution": "重做接頭喇叭口、抽真空後補充冷媒，觀察兩小時無告警", "laborHours": 3.5,
+      "steps": [
+        { "do": "assign", "at": 1, "by": "lin.meiling", "to": "chang.zhiwei" },
+        { "do": "start", "at": 2, "by": "chang.zhiwei" },
+        { "do": "issue", "at": 4, "by": "chang.zhiwei", "part": "P02", "qty": 2 },
+        { "do": "complete", "at": 6, "by": "chang.zhiwei" }
+      ] },
+    { "key": "W10", "asset": "PE3", "priority": "Low", "requester": "tsai.minghui", "createdHoursAgo": 60,
+      "title": "封箱機輸送帶跑偏", "description": "紙箱行進時逐漸偏向右側，偶爾卡住導桿。",
+      "cause": "從動輪調整螺絲鬆脫", "resolution": "重新校正皮帶張力與平行度並鎖固螺絲", "laborHours": 1.5,
+      "steps": [
+        { "do": "assign", "at": 3, "by": "wang.jianhong", "to": "huang.junjie" },
+        { "do": "start", "at": 20, "by": "huang.junjie" },
+        { "do": "complete", "at": 26, "by": "huang.junjie" }
+      ] },
+    { "key": "W11", "asset": "AC4", "priority": "Normal", "requester": "wu.shufen", "createdHoursAgo": 480,
+      "title": "大廳冷氣滴水", "description": "吸頂機面板邊緣滴水，地板濕滑。",
+      "cause": "濾網堵塞造成結霜，排水盤積污", "resolution": "更換濾網、清洗排水盤與排水管", "laborHours": 2,
+      "steps": [
+        { "do": "accept", "at": 2, "by": "chang.zhiwei" },
+        { "do": "start", "at": 4, "by": "chang.zhiwei" },
+        { "do": "issue", "at": 5, "by": "chang.zhiwei", "part": "P01", "qty": 4 },
+        { "do": "complete", "at": 30, "by": "chang.zhiwei" },
+        { "do": "comment", "at": 40, "by": "wu.shufen", "note": "觀察一天沒有再滴水了。" },
+        { "do": "verify", "at": 48, "by": "wu.shufen" }
+      ] },
+    { "key": "W12", "asset": "FS1", "priority": "High", "requester": "admin", "createdHoursAgo": 840,
+      "title": "氣體滅火系統壓力表偏低", "description": "藥劑鋼瓶壓力表指針落在黃色區域。",
+      "cause": "鋼瓶閥件微洩", "resolution": "由消防廠商更換閥件並補充藥劑，完成壓力測試", "laborHours": 4, "vendorCost": 18500,
+      "steps": [
+        { "do": "assign", "at": 1, "by": "lin.meiling", "to": "chang.zhiwei" },
+        { "do": "start", "at": 2, "by": "chang.zhiwei" },
+        { "do": "sendout", "at": 3, "by": "chang.zhiwei", "vendor": "fire", "returnInDays": 1, "note": "鋼瓶送消防廠商檢修。" },
+        { "do": "return", "at": 9, "by": "chang.zhiwei", "note": "廠商送回並完成安裝。" },
+        { "do": "complete", "at": 10, "by": "chang.zhiwei" },
+        { "do": "verify", "at": 20, "by": "admin" }
+      ] },
+    { "key": "W13", "asset": "OF1", "priority": "Low", "requester": "hsu.peiyu", "createdHoursAgo": 360,
+      "title": "升降桌控制面板無反應", "description": "按上下鍵沒有任何動作。",
+      "steps": [ { "do": "cancel", "at": 3, "by": "hsu.peiyu", "note": "確認是插頭鬆脫，插回後恢復正常。" } ] },
+    { "key": "W14", "asset": "IT3", "priority": "Normal", "requester": "admin", "createdHoursAgo": 192,
+      "title": "UPS 蜂鳴器間歇鳴叫", "description": "凌晨與上午各響一次，面板顯示市電異常。",
+      "steps": [
+        { "do": "assign", "at": 1, "by": "lin.meiling", "to": "liu.yating" },
+        { "do": "cancel", "at": 5, "by": "lin.meiling", "note": "台電當日施工造成電壓波動，設備本身無異常。" }
+      ] },
+    { "key": "W15", "asset": "AC1", "priority": "High", "requester": "hsu.peiyu", "createdHoursAgo": 49,
+      "title": "冷氣完全無法啟動", "description": "遙控器與機身按鍵都沒有反應，指示燈不亮。", "steps": [] },
+    { "key": "W16", "asset": "PE1", "priority": "High", "requester": "wang.jianhong", "createdHoursAgo": 96,
+      "title": "CNC 刀庫換刀卡住", "description": "自動換刀到一半停住，出現刀臂定位告警，目前只能手動換刀。",
+      "steps": [
+        { "do": "assign", "at": 1, "by": "wang.jianhong", "to": "huang.junjie" },
+        { "do": "start", "at": 2, "by": "huang.junjie" },
+        { "do": "comment", "at": 20, "by": "huang.junjie", "note": "刀臂感測器訊號不穩，聯絡原廠確認料號中。" }
+      ] },
+    { "key": "W17", "asset": "AC2", "priority": "Urgent", "requester": "admin", "createdHoursAgo": 3,
+      "title": "機房溫度過高，空調停機", "description": "機房溫度已達 30 度並持續上升，精密空調顯示高壓跳脫。",
+      "steps": [
+        { "do": "assign", "at": 0.3, "by": "lin.meiling", "to": "chang.zhiwei" },
+        { "do": "start", "at": 0.6, "by": "chang.zhiwei" }
+      ] },
+    { "key": "W18", "asset": "FS2", "priority": "Urgent", "requester": "wu.shufen", "createdHoursAgo": 288,
+      "title": "火警總機誤報持續鳴響", "description": "2F 迴路反覆誤報，現場確認無煙無火。",
+      "cause": "2F 茶水間偵煙探測器受蒸氣干擾故障", "resolution": "更換為差動式感熱探測器並復歸總機", "laborHours": 3,
+      "steps": [
+        { "do": "assign", "at": 0.2, "by": "lin.meiling", "to": "chang.zhiwei" },
+        { "do": "start", "at": 0.5, "by": "chang.zhiwei" },
+        { "do": "complete", "at": 5, "by": "chang.zhiwei" },
+        { "do": "verify", "at": 8, "by": "wu.shufen" }
+      ] },
+    { "key": "W19", "asset": "IT3", "plan": "weekly", "priority": "Normal", "requester": null, "createdHoursAgo": 22,
+      "title": "不斷電系統每週檢查", "description": "系統依保養計畫自動產生。",
+      "steps": [ { "do": "assign", "at": 0, "by": null, "to": "liu.yating" } ] },
+    { "key": "W20", "asset": "FS2", "plan": "yearly", "priority": "High", "requester": null, "createdHoursAgo": 816,
+      "title": "火警受信總機年度檢修", "description": "系統依保養計畫自動產生。",
+      "cause": "年度定期保養", "resolution": "各迴路與備用電源測試正常，檢修紀錄已歸檔", "laborHours": 6,
+      "steps": [
+        { "do": "assign", "at": 0, "by": null, "to": "chang.zhiwei" },
+        { "do": "start", "at": 240, "by": "chang.zhiwei" },
+        { "do": "complete", "at": 246, "by": "chang.zhiwei" },
+        { "do": "verify", "at": 264, "by": "lin.meiling" }
+      ] },
+    { "key": "W21", "asset": "IT1", "priority": "Normal", "requester": "hsu.peiyu", "createdHoursAgo": 52,
+      "title": "筆電風扇噪音大且容易過熱", "description": "編譯程式時風扇噪音很大，偶爾因過熱降速。",
+      "cause": "散熱鰭片積塵", "resolution": "清潔散熱模組", "laborHours": 1,
+      "steps": [
+        { "do": "assign", "at": 1, "by": "lin.meiling", "to": "liu.yating" },
+        { "do": "start", "at": 3, "by": "liu.yating" },
+        { "do": "complete", "at": 10, "by": "liu.yating" },
+        { "do": "reject", "at": 24, "by": "hsu.peiyu", "note": "跑編譯十分鐘後仍然過熱降速，請再檢查。" },
+        { "do": "comment", "at": 26, "by": "liu.yating", "note": "將重新塗抹散熱膏並測試風扇轉速。" }
+      ] },
+    { "key": "W22", "asset": "AC3", "priority": "Normal", "requester": "tsai.minghui", "createdHoursAgo": 600,
+      "title": "冷氣風量明顯變小", "description": "出風口幾乎感覺不到風。",
+      "cause": "濾網堵塞且風扇皮帶鬆弛", "resolution": "更換濾網並調整皮帶張力", "laborHours": 3,
+      "steps": [
+        { "do": "assign", "at": 2, "by": "wang.jianhong", "to": "chang.zhiwei" },
+        { "do": "start", "at": 4, "by": "chang.zhiwei" },
+        { "do": "complete", "at": 8, "by": "chang.zhiwei" },
+        { "do": "reject", "at": 20, "by": "tsai.minghui", "note": "開機半天後風量又變小。" },
+        { "do": "issue", "at": 36, "by": "chang.zhiwei", "part": "P01", "qty": 2 },
+        { "do": "complete", "at": 40, "by": "chang.zhiwei" },
+        { "do": "verify", "at": 50, "by": "tsai.minghui" }
+      ] },
+    { "key": "W23", "asset": "PE2", "priority": "High", "requester": "tsai.minghui", "createdHoursAgo": 2.5, "photos": 2,
+      "title": "空壓機漏油", "description": "機台底部有一灘油漬，已先鋪吸油棉。",
+      "steps": [ { "do": "assign", "at": 1, "by": "wang.jianhong", "to": "huang.junjie" } ] },
+    { "key": "W24", "asset": "IT2", "priority": "Normal", "requester": "wu.shufen", "createdHoursAgo": 26, "photos": 1,
+      "title": "彩色列印出現直條紋", "description": "彩色頁面右側固定出現一條洋紅色直線。",
+      "cause": "雷射視窗沾附碳粉", "resolution": "清潔雷射視窗與轉印帶，列印測試頁正常", "laborHours": 0.5,
+      "steps": [
+        { "do": "assign", "at": 1, "by": "lin.meiling", "to": "liu.yating" },
+        { "do": "start", "at": 2, "by": "liu.yating" },
+        { "do": "complete", "at": 5, "by": "liu.yating" }
+      ] },
+    { "key": "W25", "asset": "AC4", "priority": "Normal", "requester": "cheng.wenxiong", "createdHoursAgo": 1320,
+      "title": "大廳冷氣製冷不足", "description": "中午時段大廳溫度偏高。",
+      "cause": "冷媒壓力不足", "resolution": "檢漏後補充冷媒", "laborHours": 2.5,
+      "steps": [
+        { "do": "assign", "at": 3, "by": "lin.meiling", "to": "chang.zhiwei" },
+        { "do": "start", "at": 6, "by": "chang.zhiwei" },
+        { "do": "issue", "at": 8, "by": "chang.zhiwei", "part": "P02", "qty": 1 },
+        { "do": "complete", "at": 28, "by": "chang.zhiwei" },
+        { "do": "verify", "at": 40, "by": "cheng.wenxiong" }
+      ] }
+  ],
+  "assetAttachments": [
+    { "asset": "PE1", "fileName": "CNC銘牌照片.png", "caption": "機台銘牌", "by": "huang.junjie", "daysAgo": 200 },
+    { "asset": "FS1", "fileName": "滅火系統配置圖.png", "caption": "鋼瓶與噴頭配置", "by": "admin", "daysAgo": 180 }
+  ],
+  "notifications": [
+    { "user": "lin.meiling", "type": "NewRepair", "workOrder": "W01", "title": "新報修 {orderNo}", "message": "{assetName}：{title}", "hoursAgo": 3, "email": true },
+    { "user": "wang.jianhong", "type": "NewRepair", "workOrder": "W02", "title": "新報修 {orderNo}", "message": "{assetName}：{title}", "hoursAgo": 6 },
+    { "user": "liu.yating", "type": "WorkOrderAssigned", "workOrder": "W03", "title": "您有新的派工 {orderNo}", "message": "{assetName}：{title}", "hoursAgo": 1.5, "email": true },
+    { "user": "huang.junjie", "type": "WorkOrderAssigned", "workOrder": "W23", "title": "您有新的派工 {orderNo}", "message": "{assetName}：{title}", "hoursAgo": 1.5 },
+    { "user": "tsai.minghui", "type": "WorkOrderStatusChanged", "workOrder": "W07", "title": "工單 {orderNo} 待料中", "message": "{assetName} 的維修正在等待零件。", "hoursAgo": 34, "read": true },
+    { "user": "hsu.peiyu", "type": "WorkOrderStatusChanged", "workOrder": "W03", "title": "工單 {orderNo} 已指派", "message": "{assetName} 已安排技術員處理。", "hoursAgo": 1.5 },
+    { "user": "liu.yating", "type": "VerificationResult", "workOrder": "W21", "title": "工單 {orderNo} 驗收未通過", "message": "申請人退回：{assetName}，請重新處理。", "hoursAgo": 28, "email": true },
+    { "user": "chang.zhiwei", "type": "VerificationResult", "workOrder": "W11", "title": "工單 {orderNo} 驗收通過", "message": "{assetName} 已結案。", "hoursAgo": 432, "read": true },
+    { "user": "lin.meiling", "type": "SlaOverdue", "workOrder": "W15", "title": "工單 {orderNo} 已逾時", "message": "{assetName}：超過回應時限仍未派工。", "hoursAgo": 20, "email": true },
+    { "user": "wang.jianhong", "type": "SlaOverdue", "workOrder": "W16", "title": "工單 {orderNo} 已逾時", "message": "{assetName}：超過完工時限。", "hoursAgo": 71, "email": true },
+    { "user": "huang.junjie", "type": "MaintenanceDue", "plan": "monthly", "title": "保養已逾期：{planName}", "message": "{assetName} 尚未完成本期保養。", "hoursAgo": 100, "read": true },
+    { "user": "liu.yating", "type": "MaintenanceDue", "plan": "weekly", "title": "保養即將到期：{planName}", "message": "{assetName} 的保養工單已產生。", "hoursAgo": 22, "email": true },
+    { "user": "lin.meiling", "type": "LowStock", "part": "P06", "title": "庫存低於安全量：{partName}", "message": "{partName} 目前庫存已低於安全量，請安排採購。", "hoursAgo": 35, "email": true },
+    { "user": "wang.jianhong", "type": "LowStock", "part": "P08", "title": "庫存低於安全量：{partName}", "message": "{partName} 目前庫存已低於安全量，請安排採購。", "hoursAgo": 120, "read": true },
+    { "user": "lin.meiling", "type": "WarrantyExpiring", "asset": "IT2", "title": "保固即將到期：{assetName}", "message": "{assetNo} 保固即將到期，請確認是否續約。", "hoursAgo": 200, "read": true, "email": true, "emailFailed": true }
+  ],
+  "auditLogs": [
+    { "user": "admin", "action": "Login", "entity": "User", "hoursAgo": 2 },
+    { "user": "lin.meiling", "action": "Login", "entity": "User", "hoursAgo": 4 },
+    { "user": "hsu.peiyu", "action": "Create", "entity": "WorkOrder", "workOrder": "W03", "hoursAgo": 2 },
+    { "user": "lin.meiling", "action": "Update", "entity": "WorkOrder", "workOrder": "W03", "detail": "派工", "hoursAgo": 1.5 },
+    { "user": "tsai.minghui", "action": "Create", "entity": "WorkOrder", "workOrder": "W23", "hoursAgo": 2.5 },
+    { "user": "lin.meiling", "action": "Transfer", "entity": "Asset", "asset": "OF2", "detail": "會議室改裝，布幕移至 2F 暫存", "hoursAgo": 792 },
+    { "user": "lin.meiling", "action": "Scrap", "entity": "Asset", "asset": "IT4", "detail": "燈泡與主機板老化，維修報價高於殘值", "hoursAgo": 1080 },
+    { "user": "lin.meiling", "action": "Scrap", "entity": "Asset", "asset": "OF3", "detail": "氣壓棒損壞且椅背斷裂", "hoursAgo": 2160 },
+    { "user": "wang.jianhong", "action": "Transfer", "entity": "Asset", "asset": "PE4", "detail": "改停放廠區裝卸碼頭", "hoursAgo": 1800 },
+    { "user": "huang.junjie", "action": "Update", "entity": "Part", "part": "P07", "detail": "入庫", "hoursAgo": 288 },
+    { "user": "admin", "action": "Create", "entity": "User", "targetUser": "hsu.peiyu", "detail": "新增使用者", "hoursAgo": 2400 },
+    { "user": "admin", "action": "Update", "entity": "User", "targetUser": "cheng.wenxiong", "detail": "停用帳號（留職停薪）", "hoursAgo": 240 },
+    { "user": "admin", "action": "Update", "entity": "AppSetting", "detail": "調整保固到期提醒天數", "hoursAgo": 500 },
+    { "user": "lin.meiling", "action": "Export", "entity": "Asset", "detail": "匯出資產清冊", "hoursAgo": 70 },
+    { "user": "wu.shufen", "action": "LoginFailed", "entity": "User", "detail": "密碼錯誤", "hoursAgo": 30 }
+  ],
+  "settings": [
+    { "key": "sla.urgent.responseHours", "value": "2", "description": "緊急工單回應時限（小時）" },
+    { "key": "sla.urgent.resolveHours", "value": "8", "description": "緊急工單完工時限（小時）" },
+    { "key": "sla.high.responseHours", "value": "4", "description": "高優先工單回應時限（小時）" },
+    { "key": "sla.high.resolveHours", "value": "24", "description": "高優先工單完工時限（小時）" },
+    { "key": "sla.normal.responseHours", "value": "8", "description": "一般工單回應時限（小時）" },
+    { "key": "sla.normal.resolveHours", "value": "72", "description": "一般工單完工時限（小時）" },
+    { "key": "sla.low.responseHours", "value": "24", "description": "低優先工單回應時限（小時）" },
+    { "key": "sla.low.resolveHours", "value": "168", "description": "低優先工單完工時限（小時）" },
+    { "key": "workOrder.autoSetAssetUnderRepair", "value": "true", "description": "開立報修工單時自動將資產設為維修中" },
+    { "key": "workOrder.duplicateReportDays", "value": "7", "description": "重複報修提示天數" },
+    { "key": "maintenance.defaultLeadDays", "value": "7", "description": "保養工單預設提前產生天數" },
+    { "key": "warranty.noticeDays", "value": "30", "description": "保固到期提前提醒天數" },
+    { "key": "upload.maxSizeMb", "value": "10", "description": "單一上傳檔案大小上限（MB）" },
+    { "key": "upload.allowedExtensions", "value": ".jpg,.jpeg,.png,.webp,.pdf,.xlsx,.docx", "description": "允許上傳的副檔名" },
+    { "key": "security.maxFailedLogins", "value": "5", "description": "連續登入失敗鎖定次數" },
+    { "key": "security.lockoutMinutes", "value": "15", "description": "帳號鎖定分鐘數" },
+    { "key": "security.passwordMinLength", "value": "8", "description": "密碼最短長度" }
+  ]
+}

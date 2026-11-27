@@ -1,0 +1,25 @@
+@model UserProfile
+@{ ViewData["Title"] = "個人資料"; }
+<h1 class="h4 mb-3">個人資料</h1>
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-4 col-md-2">姓名</dt><dd class="col-8 col-md-10">@Model.DisplayName</dd>
+            <dt class="col-4 col-md-2">帳號</dt><dd class="col-8 col-md-10">@Model.UserName</dd>
+            <dt class="col-4 col-md-2">角色</dt><dd class="col-8 col-md-10">@Model.Role.Label()</dd>
+            <dt class="col-4 col-md-2">部門</dt><dd class="col-8 col-md-10">@(Model.DepartmentName ?? "—")</dd>
+            <dt class="col-4 col-md-2">Email</dt><dd class="col-8 col-md-10 text-break">@Model.Email</dd>
+            <dt class="col-4 col-md-2">電話</dt><dd class="col-8 col-md-10">@(Model.Phone ?? "—")</dd>
+            <dt class="col-4 col-md-2">上次登入</dt><dd class="col-8 col-md-10">@Clock.Format(Model.LastLoginAt)</dd>
+        </dl>
+    </div>
+</div>
+<div class="d-grid gap-2 d-md-flex">
+    @if (User.IsInRole(Roles.Admin))
+    {
+        <a class="btn btn-outline-primary btn-lg" asp-controller="Admin" asp-action="Index"><i class="bi bi-gear"></i> 系統管理</a>
+    }
+    <form asp-controller="Account" asp-action="Logout" method="post" class="d-grid">
+        <button type="submit" class="btn btn-outline-danger btn-lg"><i class="bi bi-box-arrow-right"></i> 登出</button>
+    </form>
+</div>
