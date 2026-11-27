@@ -1,0 +1,7 @@
+@model PhotoInputViewModel
+@{ var inputId = $"photo-{Model.Name}"; }
+<input type="file" class="form-control form-control-lg" id="@inputId" name="@Model.Name" multiple
+       accept="@string.Join(",", Model.Rules.Extensions)" data-max-files="5" data-max-mb="@Model.Rules.MaxSizeMb"
+       data-preview="#@inputId-preview" />
+<div class="form-text">最多 5 張，單張上限 @Model.Rules.MaxSizeMb MB；手機可直接拍照或從相簿選取。</div>
+<div class="photo-preview" id="@inputId-preview"></div>

@@ -21,7 +21,17 @@
 
 <h2 class="h6 text-secondary mt-4">常用功能</h2>
 <div class="list-group">
+    <a class="list-group-item list-group-item-action py-3" asp-controller="WorkOrders" asp-action="Create"><i class="bi bi-tools me-2"></i>我要報修</a>
+    <a class="list-group-item list-group-item-action py-3" asp-controller="WorkOrders" asp-action="Index"><i class="bi bi-clipboard-check me-2"></i>工單清單</a>
     <a class="list-group-item list-group-item-action py-3" asp-controller="Assets" asp-action="Index"><i class="bi bi-pc-display me-2"></i>資產清單</a>
+    @if (User.IsStaff())
+    {
+        <a class="list-group-item list-group-item-action py-3" asp-controller="Parts" asp-action="Index"><i class="bi bi-box-seam me-2"></i>零件庫存</a>
+    }
+    @if (User.IsManager())
+    {
+        <a class="list-group-item list-group-item-action py-3" asp-controller="Vendors" asp-action="Index"><i class="bi bi-building me-2"></i>廠商</a>
+    }
     @if (User.IsManager())
     {
         <a class="list-group-item list-group-item-action py-3" asp-controller="Assets" asp-action="Create"><i class="bi bi-plus-square me-2"></i>新增資產</a>

@@ -20,4 +20,8 @@ public static class AuditActions
     public const string Activate = "Activate";
     public const string Deactivate = "Deactivate";
     public const string Unlock = "Unlock";
+    public const string Assign = "Assign";
+    public const string CancelWorkOrder = "CancelWorkOrder";
+    public const string StockIn = "StockIn";
+    public const string AdjustStock = "AdjustStock";
 }

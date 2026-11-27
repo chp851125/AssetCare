@@ -28,7 +28,11 @@
                     <li class="nav-item"><a class="nav-link @Active("Home")" asp-controller="Home" asp-action="Index">首頁</a></li>
                     <li class="nav-item"><a class="nav-link @(Active("Assets") + Active("Categories") + Active("Locations"))" asp-controller="Assets" asp-action="Index">資產</a></li>
                     <li class="nav-item"><a class="nav-link @Active("Scan")" asp-controller="Scan" asp-action="Index">掃碼</a></li>
-                    <li class="nav-item"><a class="nav-link @Active("WorkOrders")" asp-controller="WorkOrders" asp-action="Mine">我的工單</a></li>
+                    <li class="nav-item"><a class="nav-link @Active("WorkOrders")" asp-controller="WorkOrders" asp-action="Mine">工單</a></li>
+                    @if (User.IsStaff())
+                    {
+                        <li class="nav-item"><a class="nav-link @(Active("Parts") + Active("Vendors"))" asp-controller="Parts" asp-action="Index">零件</a></li>
+                    }
                     @if (User.IsInRole(Roles.Admin))
                     {
                         <li class="nav-item"><a class="nav-link @(Active("Admin") + Active("Users"))" asp-controller="Admin" asp-action="Index">系統管理</a></li>

@@ -21,6 +21,14 @@ public static class BadgeExtensions
         _ => "text-bg-light border"
     };
 
+    public static string BadgeClass(this Priority priority) => priority switch
+    {
+        Priority.Urgent => "text-bg-danger",
+        Priority.High => "text-bg-warning",
+        Priority.Normal => "text-bg-light border",
+        _ => "text-bg-light border text-secondary"
+    };
+
     public static string BadgeClass(this WorkOrderStatus status) => status switch
     {
         WorkOrderStatus.Open => "text-bg-info",

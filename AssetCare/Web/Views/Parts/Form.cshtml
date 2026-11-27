@@ -1,0 +1,77 @@
+@model PartFormViewModel
+@{
+    var isNew = Model.Id is null;
+    ViewData["Title"] = isNew ? "新增零件" : "編輯零件";
+}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <h1 class="h4 mb-3">@ViewData["Title"] <span class="text-secondary fs-6">@Model.PartNo</span></h1>
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="@(isNew ? "Create" : "Edit")" asp-route-id="@Model.Id" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+                    <input type="hidden" asp-for="Version" />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" maxlength="100" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Spec" class="form-label"></label>
+                            <input asp-for="Spec" class="form-control" maxlength="100" />
+                            <span asp-validation-for="Spec" class="text-danger small"></span>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label asp-for="Unit" class="form-label"></label>
+                            <input asp-for="Unit" class="form-control" maxlength="10" />
+                            <span asp-validation-for="Unit" class="text-danger small"></span>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label asp-for="SafetyStock" class="form-label"></label>
+                            <input asp-for="SafetyStock" class="form-control" type="number" min="0" />
+                            <span asp-validation-for="SafetyStock" class="text-danger small"></span>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label asp-for="UnitCost" class="form-label"></label>
+                            <input asp-for="UnitCost" class="form-control" type="number" min="0" step="0.01" />
+                            <span asp-validation-for="UnitCost" class="text-danger small"></span>
+                        </div>
+                        @if (isNew)
+                        {
+                            <div class="col-6 col-md-3">
+                                <label asp-for="InitialStock" class="form-label"></label>
+                                <input asp-for="InitialStock" class="form-control" type="number" min="0" />
+                                <span asp-validation-for="InitialStock" class="text-danger small"></span>
+                            </div>
+                        }
+                        <div class="col-md-6">
+                            <label asp-for="VendorId" class="form-label"></label>
+                            <select asp-for="VendorId" class="form-select" asp-items="Model.Vendors.ToSelectList()">
+                                <option value="">—</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="StorageLocation" class="form-label"></label>
+                            <input asp-for="StorageLocation" class="form-control" maxlength="50" />
+                            <span asp-validation-for="StorageLocation" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-check py-1">
+                                <input asp-for="IsActive" class="form-check-input" />
+                                <span class="form-check-label">啟用</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary">儲存</button>
+                        <a class="btn btn-link" asp-action="Index">取消</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
